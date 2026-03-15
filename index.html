@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civic Brief</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1b1b1f;
+            --paper: #fcfaf7;
+            --warm: #f5f0e8;
+            --accent: #b44d12;
+            --accent-glow: rgba(180,77,18,0.15);
+            --civic: #1e3a5f;
+            --civic-light: #e8eef5;
+            --muted: #8a8a92;
+            --border: #e2ddd4;
+            --green: #2d6a4f;
+            --green-light: #e9f5ec;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        section[id]{scroll-margin-top:80px;}
+        body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;overflow-x:hidden;}
+
+        /* ── NAV ── */
+        nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 40px;display:flex;justify-content:space-between;align-items:center;background:rgba(252,250,247,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,221,212,0.5);}
+        .nav-logo{font-family:'Fraunces',serif;font-weight:800;font-size:22px;}
+        .nav-links{display:flex;gap:28px;align-items:center;}
+        .nav-links a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+        .nav-links a:hover{color:var(--ink);}
+        .nav-pill{background:var(--ink);color:var(--paper);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;}
+
+        /* ── HERO ── */
+        .hero{min-height:100vh;display:flex;align-items:center;padding:120px 40px 80px;max-width:1280px;margin:0 auto;}
+        .hero-left{flex:1;max-width:560px;}
+        .hero-right{flex:1;display:flex;justify-content:center;align-items:center;position:relative;}
+
+        .hero-eyebrow{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:24px;opacity:0;animation:fadeUp 0.6s 0.2s forwards;}
+        .hero h1{font-family:'Fraunces',serif;font-size:clamp(38px,5vw,58px);font-weight:800;line-height:1.08;margin-bottom:24px;opacity:0;animation:fadeUp 0.6s 0.4s forwards;}
+        .hero h1 em{font-style:italic;color:var(--accent);}
+        .hero .tagline{font-size:18px;color:var(--muted);font-weight:300;max-width:460px;margin-bottom:40px;opacity:0;animation:fadeUp 0.6s 0.6s forwards;}
+        .hero-cta{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);padding:16px 32px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;transition:all 0.3s;opacity:0;animation:fadeUp 0.6s 0.8s forwards;border:none;cursor:pointer;}
+        .hero-cta:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.18);}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+        /* ── HERO VISUAL: Two sides ── */
+        .hero-visual{position:relative;width:100%;max-width:520px;height:500px;}
+
+        /* Docs side (left/back) */
+        .doc-stack{position:absolute;left:-20px;top:40px;width:200px;z-index:1;}
+        .doc-page{background:white;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:-140px;box-shadow:0 2px 12px rgba(0,0,0,0.06);transform:rotate(-4deg);opacity:0;animation:docFloat 0.8s forwards;}
+        .doc-page:nth-child(1){animation-delay:1s;transform:rotate(-6deg) translateY(0);}
+        .doc-page:nth-child(2){animation-delay:1.2s;transform:rotate(-2deg) translateY(0);}
+        .doc-page:nth-child(3){animation-delay:1.4s;transform:rotate(-5deg) translateY(0);}
+        @keyframes docFloat{to{opacity:0.7;}}
+        .doc-page-header{font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--civic);margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+        .doc-line{height:4px;background:var(--border);border-radius:2px;margin-bottom:4px;width:100%;}
+        .doc-line.short{width:60%;}
+        .doc-line.med{width:80%;}
+        .doc-line-highlight{height:4px;background:var(--accent-glow);border-radius:2px;margin-bottom:4px;width:70%;border:1px solid rgba(180,77,18,0.2);}
+
+        /* Arrow flow */
+        .flow-arrow{position:absolute;left:170px;top:200px;z-index:2;opacity:0;animation:arrowPulse 2s 1.6s infinite;}
+        @keyframes arrowPulse{0%,100%{opacity:0.3;transform:translateX(0);}50%{opacity:1;transform:translateX(8px);}}
+        .flow-arrow svg{width:60px;height:40px;}
+
+        /* Phone (right/front) */
+        .phone-hero{position:absolute;right:0;top:10px;z-index:3;opacity:0;animation:phoneSlide 0.8s 1s forwards;}
+        @keyframes phoneSlide{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+
+        .phone{width:260px;height:520px;background:#fff;border-radius:32px;border:5px solid var(--ink);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);position:relative;}
+        .phone-notch{width:90px;height:22px;background:var(--ink);border-radius:0 0 14px 14px;margin:0 auto;}
+        .phone-screen{padding:6px 14px 14px;height:calc(100% - 22px);overflow:hidden;background:#fafafa;}
+        .phone-top{display:flex;justify-content:space-between;align-items:center;padding:10px 0 8px;border-bottom:1px solid #eee;margin-bottom:10px;}
+        .phone-top-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;}
+        .phone-top-dot{width:8px;height:8px;background:var(--green);border-radius:50%;}
+
+        .pcard{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px 12px;margin-bottom:7px;opacity:0;animation:pcardIn 0.4s forwards;}
+        .pcard:nth-child(1){animation-delay:1.4s;}
+        .pcard:nth-child(2){animation-delay:1.7s;}
+        .pcard:nth-child(3){animation-delay:2s;}
+        @keyframes pcardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+        .pcard-tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:5px;}
+        .t-budget{background:#fef3e2;color:var(--accent);}
+        .t-zone{background:var(--civic-light);color:var(--civic);}
+        .t-policy{background:var(--green-light);color:var(--green);}
+        .pcard-title{font-weight:600;font-size:12px;line-height:1.3;margin-bottom:3px;}
+        .pcard-body{font-size:10px;color:var(--muted);line-height:1.5;}
+        .pcard-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:8px;color:#bbb;}
+        .lang-badges{display:flex;gap:3px;}
+        .lbadge{width:16px;height:16px;border-radius:50%;font-size:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;}
+
+        /* ── STATS ── */
+        .stats{background:var(--ink);padding:56px 40px;}
+        .stats-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;}
+        .stat-num{font-family:'Fraunces',serif;font-size:clamp(32px,4vw,48px);font-weight:800;color:#fff;}
+        .stat-label{font-size:13px;color:rgba(255,255,255,0.45);font-weight:300;margin-top:4px;}
+
+        /* ── PIPELINE ── */
+        .pipeline{max-width:1280px;margin:0 auto;padding:100px 40px;}
+        .pipeline h2{font-family:'Fraunces',serif;font-size:clamp(30px,4vw,44px);font-weight:800;text-align:center;margin-bottom:12px;}
+        .pipeline .sub{text-align:center;color:var(--muted);font-weight:300;font-size:18px;max-width:520px;margin:0 auto 60px;}
+
+        .pipe-flow{display:flex;align-items:stretch;gap:0;position:relative;}
+        .pipe-step{flex:1;text-align:center;padding:32px 20px;position:relative;}
+        .pipe-step::after{content:'';position:absolute;right:-1px;top:50%;width:32px;height:2px;background:var(--border);z-index:1;}
+        .pipe-step:last-child::after{display:none;}
+        .pipe-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px;transition:transform 0.3s;}
+        .pipe-step:hover .pipe-icon{transform:scale(1.1);}
+        .pipe-title{font-weight:600;font-size:15px;margin-bottom:6px;}
+        .pipe-desc{font-size:13px;color:var(--muted);font-weight:300;line-height:1.6;}
+
+        /* ── SCENARIOS (TABS) ── */
+        .scenarios{background:var(--warm);padding:100px 40px;}
+        .scenarios-inner{max-width:1280px;margin:0 auto;}
+        .scenarios h2{font-family:'Fraunces',serif;font-size:clamp(30px,4vw,44px);font-weight:800;text-align:center;margin-bottom:12px;}
+        .scenarios .sub{text-align:center;color:var(--muted);font-weight:300;font-size:18px;max-width:520px;margin:0 auto 48px;}
+
+        .tab-bar{display:flex;justify-content:center;gap:6px;margin-bottom:48px;flex-wrap:wrap;}
+        .tab-btn{padding:10px 22px;border-radius:24px;border:1px solid var(--border);background:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.3s;color:var(--muted);}
+        .tab-btn:hover{border-color:var(--accent);color:var(--accent);}
+        .tab-btn.active{background:var(--ink);color:white;border-color:var(--ink);}
+
+        .tab-content{display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;gap:0;max-width:960px;margin:0 auto;}
+
+        .tab-doc{background:white;border:1px solid var(--border);border-radius:14px;padding:0;overflow:hidden;opacity:0;transform:translateX(-20px);transition:all 0.5s;}
+        .tab-doc.show{opacity:1;transform:translateX(0);}
+        .tab-doc-header{background:var(--civic);color:white;padding:10px 18px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+        .tab-doc-body{padding:20px;font-family:'Courier New',monospace;font-size:11px;color:var(--muted);line-height:1.8;}
+        .tab-doc-body .hl{background:rgba(180,77,18,0.1);border-bottom:2px solid var(--accent);padding:0 2px;}
+
+        .tab-arrow{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--accent);}
+        .tab-arrow-line{width:2px;height:40px;background:linear-gradient(to bottom,var(--border),var(--accent));}
+        .tab-arrow-icon{font-size:20px;animation:arrowBounce 1.5s infinite;}
+        @keyframes arrowBounce{0%,100%{transform:translateX(0);}50%{transform:translateX(6px);}}
+        .tab-arrow-label{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);writing-mode:vertical-rl;text-orientation:mixed;}
+
+        .tab-phone-wrap{display:flex;justify-content:center;opacity:0;transform:translateX(20px);transition:all 0.5s 0.2s;}
+        .tab-phone-wrap.show{opacity:1;transform:translateX(0);}
+
+        .phone-sm{width:220px;background:#fff;border-radius:28px;border:4px solid var(--ink);overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.1);}
+        .phone-sm-notch{width:70px;height:18px;background:var(--ink);border-radius:0 0 12px 12px;margin:0 auto;}
+        .phone-sm-screen{padding:8px 12px 14px;}
+        .phone-sm-header{font-family:'Fraunces',serif;font-size:12px;font-weight:700;text-align:center;padding:8px 0 6px;border-bottom:1px solid #eee;margin-bottom:8px;}
+
+        .brief-item{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;}
+        .brief-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+        .brief-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);}
+        .brief-val{font-size:12px;font-weight:500;line-height:1.4;margin-top:1px;}
+
+        /* Mini chart for budget tab */
+        .mini-chart{display:flex;align-items:flex-end;gap:4px;height:50px;padding:8px 0;}
+        .mini-bar{flex:1;border-radius:3px 3px 0 0;transition:height 0.5s;}
+
+        /* Share button */
+        .share-row{display:flex;gap:6px;margin-top:8px;}
+        .share-btn{flex:1;text-align:center;padding:6px;border-radius:6px;font-size:9px;font-weight:600;border:1px solid #eee;}
+        .share-wa{background:#25D366;color:white;border-color:#25D366;}
+        .share-link{background:white;color:var(--ink);}
+
+        /* ── VERIFICATION ── */
+        .verify{max-width:1280px;margin:0 auto;padding:100px 40px;}
+        .verify h2{font-family:'Fraunces',serif;font-size:clamp(30px,4vw,44px);font-weight:800;text-align:center;margin-bottom:12px;}
+        .verify .sub{text-align:center;color:var(--muted);font-weight:300;font-size:18px;max-width:560px;margin:0 auto 60px;}
+        .verify-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+        .verify-card{text-align:center;padding:28px 20px;background:white;border:1px solid var(--border);border-radius:12px;transition:all 0.3s;position:relative;}
+        .verify-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.06);}
+        .verify-card::after{content:'';position:absolute;right:-12px;top:50%;width:24px;height:2px;background:var(--border);}
+        .verify-card:last-child::after{display:none;}
+        .verify-num{font-family:'Fraunces',serif;font-size:28px;font-weight:800;color:var(--accent);margin-bottom:8px;}
+        .verify-title{font-weight:600;font-size:14px;margin-bottom:6px;}
+        .verify-desc{font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;}
+
+        /* ── QUOTE ── */
+        .quote{padding:100px 40px;text-align:center;max-width:800px;margin:0 auto;}
+        .quote-text{font-family:'Fraunces',serif;font-size:clamp(22px,3.5vw,34px);font-weight:400;font-style:italic;line-height:1.45;margin-bottom:24px;}
+        .quote-attr{font-size:15px;color:var(--muted);}
+        .quote-attr strong{color:var(--ink);font-weight:600;}
+
+        /* ── OPEN SOURCE ── */
+        .open{background:var(--ink);color:white;padding:80px 40px;text-align:center;}
+        .open h2{font-family:'Fraunces',serif;font-size:34px;font-weight:800;margin-bottom:14px;}
+        .open p{font-size:17px;font-weight:300;color:rgba(255,255,255,0.55);max-width:560px;margin:0 auto 28px;}
+        .open-badges{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+        .open-badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;}
+
+        /* ── FOOTER ── */
+        footer{padding:40px;text-align:center;border-top:1px solid var(--border);}
+        .f-logo{font-family:'Fraunces',serif;font-size:20px;font-weight:800;margin-bottom:6px;}
+        .f-sub{font-size:13px;color:var(--muted);font-weight:300;}
+        .f-moz{margin-top:12px;font-size:11px;color:var(--muted);opacity:0.5;}
+
+        /* ── REVEAL ── */
+        .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s,transform 0.7s;}
+        .reveal.visible{opacity:1;transform:translateY(0);}
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px){
+            .hero{flex-direction:column;text-align:center;padding:120px 24px 60px;min-height:auto;}
+            .hero-left{max-width:100%;}
+            .hero .tagline{margin:0 auto 40px;}
+            .hero-visual{width:100%;max-width:400px;height:400px;margin:0 auto;}
+            .doc-stack{display:none;}
+            .flow-arrow{display:none;}
+            .phone-hero{position:relative;right:auto;top:auto;margin:0 auto;}
+            .stats-inner{grid-template-columns:repeat(2,1fr);}
+            .pipe-flow{flex-direction:column;gap:24px;}
+            .pipe-step::after{display:none;}
+            .tab-content{grid-template-columns:1fr;gap:20px;}
+            .tab-arrow{flex-direction:row;justify-content:center;padding:12px 0;}
+            .tab-arrow-line{width:40px;height:2px;}
+            .tab-arrow-label{writing-mode:horizontal-tb;}
+            .tab-arrow-icon{animation-name:arrowBounceDown;}
+            @keyframes arrowBounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+            .verify-grid{grid-template-columns:repeat(2,1fr);}
+            .verify-card::after{display:none;}
+            .nav-links{display:none;}
+        }
+        @media(max-width:480px){
+            .stats-inner{grid-template-columns:1fr 1fr;gap:16px;}
+            .tab-bar{gap:4px;}
+            .tab-btn{padding:8px 14px;font-size:12px;}
+            .verify-grid{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">Civic Brief</div>
+    <div class="nav-links">
+        <a href="#scenarios">Scenarios</a>
+        <a href="#verify">Verification</a>
+        <a href="#open">Open Source</a>
+        <span class="nav-pill">Coming April 2026</span>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-left">
+        <div class="hero-eyebrow">Open Source Civic Intelligence</div>
+        <h1>Your government,<br>in <em>your language,</em><br>in plain language.</h1>
+        <p class="tagline">Government documents go in. Plain-language civic briefs come out. In the languages your community actually speaks.</p>
+        <a href="#scenarios" class="hero-cta" onclick="event.preventDefault();document.getElementById('scenarios').scrollIntoView({behavior:'smooth'});">See it in action &#8595;</a>
+    </div>
+    <div class="hero-right">
+        <div class="hero-visual">
+            <!-- Document stack (input side) -->
+            <div class="doc-stack">
+                <div class="doc-page">
+                    <div class="doc-page-header">City Budget FY2026</div>
+                    <div class="doc-line"></div><div class="doc-line med"></div><div class="doc-line-highlight"></div><div class="doc-line short"></div><div class="doc-line"></div><div class="doc-line med"></div>
+                </div>
+                <div class="doc-page">
+                    <div class="doc-page-header">Resolution No. 2026-0142</div>
+                    <div class="doc-line"></div><div class="doc-line"></div><div class="doc-line short"></div><div class="doc-line-highlight"></div><div class="doc-line med"></div>
+                </div>
+                <div class="doc-page">
+                    <div class="doc-page-header">Zoning Amendment 47-B</div>
+                    <div class="doc-line med"></div><div class="doc-line"></div><div class="doc-line-highlight"></div><div class="doc-line"></div><div class="doc-line short"></div>
+                </div>
+            </div>
+
+            <!-- Flow arrow -->
+            <div class="flow-arrow">
+                <svg viewBox="0 0 60 40" fill="none"><path d="M4 20h44m0 0l-12-10m12 10l-12 10" stroke="#b44d12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
+            <!-- Phone (output side) -->
+            <div class="phone-hero">
+                <div class="phone">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="phone-top">
+                            <div class="phone-top-title">Civic Brief</div>
+                            <div class="phone-top-dot"></div>
+                        </div>
+                        <div class="pcard">
+                            <div class="pcard-tag t-budget">Budget</div>
+                            <div class="pcard-title">Property Tax Up 8.2%</div>
+                            <div class="pcard-body">$4.1M increase allocated to road repair and school facilities. View full breakdown.</div>
+                            <div class="pcard-footer"><span>2 min ago</span><div class="lang-badges"><div class="lbadge" style="background:var(--civic);">EN</div><div class="lbadge" style="background:var(--accent);">ES</div></div></div>
+                        </div>
+                        <div class="pcard">
+                            <div class="pcard-tag t-zone">Zoning</div>
+                            <div class="pcard-title">Elm St Rezoned Mixed-Use</div>
+                            <div class="pcard-body">Blocks 400-600. Approved 4-1. Comment deadline: April 5.</div>
+                            <div class="pcard-footer"><span>1 hr ago</span><div class="lang-badges"><div class="lbadge" style="background:var(--civic);">EN</div></div></div>
+                        </div>
+                        <div class="pcard">
+                            <div class="pcard-tag t-policy">Policy</div>
+                            <div class="pcard-title">New Farm Subsidy Scheme</div>
+                            <div class="pcard-body">Farms under 5ha eligible. Apply by May 1. Replaces Phase III.</div>
+                            <div class="pcard-footer"><span>Today</span><div class="lang-badges"><div class="lbadge" style="background:var(--civic);">EN</div><div class="lbadge" style="background:var(--green);">HI</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stats-inner">
+        <div><div class="stat-num">3,500+</div><div class="stat-label">newspapers closed in 20 years</div></div>
+        <div><div class="stat-num">213</div><div class="stat-label">US counties, zero local news</div></div>
+        <div><div class="stat-num">50M</div><div class="stat-label">Americans with limited civic access</div></div>
+        <div><div class="stat-num">4B+</div><div class="stat-label">citizens in non-dominant languages</div></div>
+    </div>
+</div>
+
+<!-- PIPELINE -->
+<section class="pipeline reveal" id="pipeline">
+    <h2>How it works</h2>
+    <p class="sub">From bureaucratic PDF to civic clarity in minutes.</p>
+    <div class="pipe-flow">
+        <div class="pipe-step">
+            <div class="pipe-icon" style="background:#fef3e2;">&#128196;</div>
+            <div class="pipe-title">Ingest</div>
+            <div class="pipe-desc">Monitors government feeds for new budgets, legislation, meeting minutes, and public notices.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-icon" style="background:#f3e8ff;">&#129504;</div>
+            <div class="pipe-title">Interpret</div>
+            <div class="pipe-desc">AI with civic-context prompting: what changed, who is affected, where the money goes.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-icon" style="background:var(--green-light);">&#9989;</div>
+            <div class="pipe-title">Verify</div>
+            <div class="pipe-desc">LLM-as-Judge scores accuracy. Low-confidence outputs routed to community reviewers.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-icon" style="background:var(--civic-light);">&#127760;</div>
+            <div class="pipe-title">Translate</div>
+            <div class="pipe-desc">Simultaneous output in English, Spanish, Hindi, Hausa, and any community language.</div>
+        </div>
+        <div class="pipe-step">
+            <div class="pipe-icon" style="background:#fce7f3;">&#128241;</div>
+            <div class="pipe-title">Deliver</div>
+            <div class="pipe-desc">Mobile portal, WhatsApp, newsletters, embeddable widgets. Where people already are.</div>
+        </div>
+    </div>
+</section>
+
+<!-- SCENARIOS (TABS) -->
+<section class="scenarios" id="scenarios">
+    <div class="scenarios-inner">
+        <h2>Five scenarios. One platform.</h2>
+        <p class="sub">Click each tab to see both sides: what goes in, and what comes out.</p>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="budget">&#128200; Budget Tracking</button>
+            <button class="tab-btn" data-tab="school">&#127979; School Board</button>
+            <button class="tab-btn" data-tab="zoning">&#127959; Zoning</button>
+            <button class="tab-btn" data-tab="legislation">&#128220; Legislation</button>
+            <button class="tab-btn" data-tab="multilingual">&#127760; Multilingual (ES/HI/+)</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Left: Document input -->
+            <div class="tab-doc show" id="tab-doc">
+                <div class="tab-doc-header" id="doc-header">City Budget FY2026-27</div>
+                <div class="tab-doc-body" id="doc-body"></div>
+            </div>
+
+            <!-- Center: Arrow -->
+            <div class="tab-arrow">
+                <div class="tab-arrow-label">AI</div>
+                <div class="tab-arrow-line"></div>
+                <div class="tab-arrow-icon">&#10132;</div>
+                <div class="tab-arrow-line"></div>
+            </div>
+
+            <!-- Right: Phone output -->
+            <div class="tab-phone-wrap show" id="tab-phone">
+                <div class="phone-sm">
+                    <div class="phone-sm-notch"></div>
+                    <div class="phone-sm-screen">
+                        <div class="phone-sm-header">Civic Brief</div>
+                        <div id="phone-content"></div>
+                        <div class="share-row">
+                            <div class="share-btn share-wa">&#128172; WhatsApp</div>
+                            <div class="share-btn share-link">&#128279; Copy Link</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VERIFICATION -->
+<section class="verify reveal" id="verify">
+    <h2>AI that earns civic trust</h2>
+    <p class="sub">Getting civic information wrong is not a quality issue. It is a democratic harm. Four layers of verification.</p>
+    <div class="verify-grid">
+        <div class="verify-card">
+            <div class="verify-num">1</div>
+            <div class="verify-title">Source Grounding</div>
+            <div class="verify-desc">Every summary generated solely from the source document. No general AI knowledge for civic claims. Auditable.</div>
+        </div>
+        <div class="verify-card">
+            <div class="verify-num">2</div>
+            <div class="verify-title">LLM-as-Judge</div>
+            <div class="verify-desc">Separate AI model scores factuality against source. Below threshold? Flagged for human review before publication.</div>
+        </div>
+        <div class="verify-card">
+            <div class="verify-num">3</div>
+            <div class="verify-title">Community Review</div>
+            <div class="verify-desc">Civil society partners and local experts verify flagged summaries. Every correction improves future output.</div>
+        </div>
+        <div class="verify-card">
+            <div class="verify-num">4</div>
+            <div class="verify-title">User Feedback</div>
+            <div class="verify-desc">Citizens flag errors directly. Patterns of error inform systemic improvements to civic prompting.</div>
+        </div>
+    </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote reveal">
+    <div class="quote-text">"Transparency is not a luxury. It is the minimum requirement for democratic participation."</div>
+    <div class="quote-attr"><strong>Jatin Patel</strong>, Founder &middot; 20+ years &middot; Group PM, Microsoft Teams &middot; Built PeopleBuilt.ai solo</div>
+</section>
+
+<!-- OPEN SOURCE -->
+<section class="open" id="open">
+    <h2>Open by design. Day one.</h2>
+    <p>Every line of code, every civic summary, every document processed. Public, auditable, deployable by any community, anywhere.</p>
+    <div class="open-badges">
+        <div class="open-badge">MIT License</div>
+        <div class="open-badge">Next.js 14</div>
+        <div class="open-badge">TypeScript</div>
+        <div class="open-badge">Supabase</div>
+        <div class="open-badge">Claude API</div>
+        <div class="open-badge">Vercel</div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="f-logo">Civic Brief</div>
+    <div class="f-sub">Plain language for public power.</div>
+    <div class="f-moz">Mozilla Foundation Democracy x AI Incubator 2026 &middot; Working demo April 2026</div>
+</footer>
+
+<script>
+// Tab scenario data
+const scenarios = {
+    budget: {
+        header: 'City Budget FY2026-27',
+        doc: `DEPARTMENT OF FINANCE<br>PROPOSED BUDGET FISCAL YEAR 2026-27<br><br>General Fund Revenues: <span class="hl">$142,800,000</span><br>General Fund Expenditures: $148,200,000<br><br>Sec 4.2 Property Tax Levy:<br>Current rate: 1.12 per $100 assessed<br>Proposed rate: <span class="hl">1.21 per $100 assessed</span><br>(8.2% increase over FY2025-26)<br><br>Allocation Changes:<br>Public Works: +$4,100,000 (road repair)<br>Education: +$2,300,000 (facilities)<br>Public Safety: <span class="hl">-$890,000</span> (fleet defer)`,
+        phone: `
+            <div class="brief-item"><div class="brief-icon" style="background:#fef3e2;color:var(--accent);">$</div><div><div class="brief-label">Your Property Tax</div><div class="brief-val">Going up 8.2%. A $300K home pays ~$270 more/year.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--green-light);color:var(--green);">&#8593;</div><div><div class="brief-label">Where It Goes</div><div class="brief-val">$4.1M to road repair. $2.3M to school buildings.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#fee2e2;color:#dc2626;">&#8595;</div><div><div class="brief-label">What Got Cut</div><div class="brief-val">Police fleet replacement delayed. Saves $890K.</div></div></div>
+            <div class="mini-chart"><div class="mini-bar" style="height:70%;background:var(--civic);border-radius:3px 3px 0 0;"></div><div class="mini-bar" style="height:85%;background:var(--civic);"></div><div class="mini-bar" style="height:100%;background:var(--accent);"></div></div>
+            <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:-4px;">FY24 &nbsp;&nbsp; FY25 &nbsp;&nbsp; FY26</div>
+            <div class="brief-item" style="margin-top:10px;"><div class="brief-icon" style="background:var(--civic-light);color:var(--civic);">&#128197;</div><div><div class="brief-label">Comment By</div><div class="brief-val">April 12. Budget hearing: April 18, 7pm City Hall.</div></div></div>`
+    },
+    school: {
+        header: 'Board of Education Resolution 2026-0142',
+        doc: `RESOLUTION NO. 2026-0142<br><br>WHEREAS, the Board of Education hereby authorizes execution of <span class="hl">Contract No. ED-2026-BUS-003</span> with TransitCo LLC for pupil transportation pursuant to RFP-2025-087, in an amount <span class="hl">not to exceed $2,400,000</span> for the period July 1, 2026 through June 30, 2029, superseding existing agreement with SafeRide Corp (<span class="hl">Contract ED-2023-BUS-001</span>)...<br><br>BE IT FURTHER RESOLVED that the Superintendent is authorized to execute all documents necessary...`,
+        phone: `
+            <div class="brief-item"><div class="brief-icon" style="background:#fef3e2;color:var(--accent);">&#916;</div><div><div class="brief-label">What Changed</div><div class="brief-val">New 3-year bus contract. TransitCo replaces SafeRide.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--civic-light);color:var(--civic);">$</div><div><div class="brief-label">The Money</div><div class="brief-val">$2.4M total (was $1.8M). That is $800K/year.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--green-light);color:var(--green);">&#10003;</div><div><div class="brief-label">What You Can Do</div><div class="brief-val">Public comment open until March 22. Next meeting April 3.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#f3e8ff;color:#7c3aed;">&#9873;</div><div><div class="brief-label">Who Voted</div><div class="brief-val">Passed 5-2. Chen, Park, Okafor, Williams, Ruiz in favor.</div></div></div>`
+    },
+    zoning: {
+        header: 'Planning Commission Amendment 47-B',
+        doc: `PLANNING COMMISSION<br>ZONING AMENDMENT APPLICATION 47-B<br><br>Applicant: Greenfield Dev Corp<br>Location: <span class="hl">400-600 Block Elm Street</span><br><br>Current: R-2 Residential<br>Proposed: <span class="hl">MU-1 Mixed Use</span><br><br>Pursuant to Municipal Code 17.24.060, the Commission recommends approval subject to conditions including: height limit 45ft, ground-floor commercial req, <span class="hl">parking variance 17.28.040(b)</span>, setback modification...<br><br>Environmental review: Cat. Exemption per CEQA 15332`,
+        phone: `
+            <div class="brief-item"><div class="brief-icon" style="background:#fef3e2;color:var(--accent);">&#127968;</div><div><div class="brief-label">Your Block</div><div class="brief-val">Elm St (400-600) changing from residential to mixed-use.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--civic-light);color:var(--civic);">&#128200;</div><div><div class="brief-label">What It Means</div><div class="brief-val">Shops and offices allowed on ground floor. Housing above. Max 45ft tall.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#fee2e2;color:#dc2626;">&#9888;</div><div><div class="brief-label">Watch Out</div><div class="brief-val">Parking requirement reduced. May affect street parking.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--green-light);color:var(--green);">&#128197;</div><div><div class="brief-label">Comment By</div><div class="brief-val">April 5. City Council vote: April 15.</div></div></div>`
+    },
+    legislation: {
+        header: 'State Senate Bill SB-1247',
+        doc: `SENATE BILL No. 1247<br><br>AN ACT to amend Section 65852.2 of the Government Code, relating to <span class="hl">accessory dwelling units</span>.<br><br>SECTION 1. (a) Notwithstanding Section 65852.2, a local agency shall not impose <span class="hl">owner-occupancy requirements</span> as a condition of approval...<br><br>(b) The maximum allowable size shall be increased to <span class="hl">1,200 square feet</span>...<br><br>(c) Ministerial approval required within <span class="hl">60 days</span> of complete application...<br><br>SEC. 2. This act shall become operative January 1, 2027.`,
+        phone: `
+            <div class="brief-item"><div class="brief-icon" style="background:#fef3e2;color:var(--accent);">&#127970;</div><div><div class="brief-label">What It Does</div><div class="brief-val">Makes it easier to build backyard apartments (ADUs). Removes owner-occupancy rule.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--civic-light);color:var(--civic);">&#128207;</div><div><div class="brief-label">Key Changes</div><div class="brief-val">Max size up to 1,200 sqft. Cities must approve within 60 days.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--green-light);color:var(--green);">&#128100;</div><div><div class="brief-label">Who It Affects</div><div class="brief-val">Homeowners who want to build rental units. Renters seeking more housing options.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#f3e8ff;color:#7c3aed;">&#128197;</div><div><div class="brief-label">When</div><div class="brief-val">Takes effect January 1, 2027 if signed by Governor.</div></div></div>`
+    },
+    multilingual: {
+        header: 'County of Los Angeles: Aviso de Audiencia Pública',
+        doc: `CONDADO DE LOS ANGELES<br>AVISO DE AUDIENCIA PÚBLICA<br><br>Por la presente se notifica que la Junta de Supervisores del Condado de Los Angeles llevará a cabo una <span class="hl">audiencia pública el 22 de abril de 2026</span> a las 10:00 a.m. para considerar la adopción de una ordenanza que modifica el Título 22 del Código del Condado...<br><br>La ordenanza propuesta <span class="hl">aumentaría los límites de densidad</span> en zonas R-3 y R-4 para permitir unidades adicionales de vivienda asequible...<br><br>Los comentarios escritos deben recibirse antes del <span class="hl">15 de abril de 2026</span>.<br><br>Also available in: English, Chinese, Korean, Vietnamese`,
+        phone: `
+            <div style="display:flex;gap:6px;margin-bottom:10px;"><div style="flex:1;text-align:center;padding:4px;border-radius:6px;background:var(--accent);color:white;font-size:10px;font-weight:600;">Espa&#241;ol</div><div style="flex:1;text-align:center;padding:4px;border-radius:6px;border:1px solid var(--border);font-size:10px;font-weight:600;">English</div><div style="flex:1;text-align:center;padding:4px;border-radius:6px;border:1px solid var(--border);font-size:10px;font-weight:600;">&#20013;&#25991;</div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#fef3e2;color:var(--accent);">&#127968;</div><div><div class="brief-label">Qu&#233; Cambia</div><div class="brief-val">M&#225;s viviendas permitidas en zonas R-3 y R-4. Vivienda asequible.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--civic-light);color:var(--civic);">&#128100;</div><div><div class="brief-label">A Qui&#233;n Afecta</div><div class="brief-val">Inquilinos y propietarios en zonas R-3/R-4 del condado de LA.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:#fee2e2;color:#dc2626;">&#9200;</div><div><div class="brief-label">Fecha L&#237;mite</div><div class="brief-val">Comentarios antes del 15 de abril. Audiencia: 22 de abril, 10am.</div></div></div>
+            <div class="brief-item"><div class="brief-icon" style="background:var(--green-light);color:var(--green);">&#10003;</div><div><div class="brief-label">Qu&#233; Puede Hacer</div><div class="brief-val">Enviar comentarios escritos o asistir a la audiencia p&#250;blica.</div></div></div>`
+    }
+};
+
+// Tab switching
+function switchTab(tabName) {
+    // Update buttons
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    // Animate out
+    const docEl = document.getElementById('tab-doc');
+    const phoneEl = document.getElementById('tab-phone');
+    docEl.classList.remove('show');
+    phoneEl.classList.remove('show');
+
+    setTimeout(() => {
+        const s = scenarios[tabName];
+        document.getElementById('doc-header').textContent = s.header;
+        document.getElementById('doc-body').innerHTML = s.doc;
+        document.getElementById('phone-content').innerHTML = s.phone;
+
+        docEl.classList.add('show');
+        phoneEl.classList.add('show');
+    }, 300);
+}
+
+// Init tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+switchTab('budget');
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.12});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
