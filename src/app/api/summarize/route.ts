@@ -9,11 +9,43 @@ import { rateLimit, validateUrl, validateFile, sanitizeText } from '@/lib/securi
 import type { CivicContent, VerificationResult } from '@/lib/types';
 
 const MAX_TEXT_LENGTH = 100_000; // ~25K words, well within Claude's context
+const DAILY_LIMIT = parseInt(process.env.DEMO_DAILY_LIMIT || '20', 10);
+
+/** Check how many documents have been processed today. Returns remaining count. */
+async function checkDailyLimit(): Promise<{ remaining: number; allowed: boolean }> {
+  const db = safeGetDb();
+  if (!db) return { remaining: DAILY_LIMIT, allowed: true };
+
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const { count } = await db
+    .from('sources')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', todayStart.toISOString());
+
+  const used = count || 0;
+  const remaining = Math.max(0, DAILY_LIMIT - used);
+  return { remaining, allowed: remaining > 0 };
+}
 
 export async function POST(request: NextRequest) {
-  // Rate limiting
+  // Rate limiting (per-IP)
   const rateLimitResponse = rateLimit(request);
   if (rateLimitResponse) return rateLimitResponse;
+
+  // Daily global limit (cost protection)
+  const { remaining, allowed } = await checkDailyLimit();
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: 'Daily demo limit reached. This is a free demo with limited daily capacity. Try again tomorrow.',
+        dailyLimit: DAILY_LIMIT,
+        remaining: 0,
+      },
+      { status: 429 }
+    );
+  }
 
   try {
     const formData = await request.formData();

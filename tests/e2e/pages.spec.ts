@@ -26,16 +26,32 @@ async function checkA11y(page: import('@playwright/test').Page, name: string) {
   expect(serious, `Serious a11y violations on ${name}`).toHaveLength(0);
 }
 
-test.describe('Home page', () => {
+test.describe('Home page (landing)', () => {
   test('loads and shows headline', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Government documents');
+    await expect(page.locator('h1')).toContainText('your language');
   });
 
-  test('has upload link', async ({ page }) => {
+  test('has try it now CTA', async ({ page }) => {
     await page.goto('/');
-    const uploadLink = page.locator('a[href="/upload"]').first();
-    await expect(uploadLink).toBeVisible();
+    const cta = page.locator('a[href="/upload"]').first();
+    await expect(cta).toBeVisible();
+  });
+
+  test('shows scenario tabs', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByText('Five scenarios')).toBeVisible();
+  });
+
+  test('scenario tabs work', async ({ page }) => {
+    await page.goto('/');
+    await page.getByText('School Board').click();
+    await expect(page.getByText('Resolution 2026-0142')).toBeVisible();
+  });
+
+  test('shows how it works section', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByText('How it works')).toBeVisible();
   });
 
   test('passes accessibility checks', async ({ page }) => {
@@ -48,6 +64,11 @@ test.describe('Upload page', () => {
   test('loads and shows form', async ({ page }) => {
     await page.goto('/upload');
     await expect(page.locator('h1')).toContainText('Upload a document');
+  });
+
+  test('shows daily limit indicator', async ({ page }) => {
+    await page.goto('/upload');
+    await expect(page.getByText(/demo uses remaining today|Daily demo limit/)).toBeVisible();
   });
 
   test('has file drop zone', async ({ page }) => {
@@ -105,30 +126,16 @@ test.describe('Brief demo page', () => {
   });
 });
 
-test.describe('Landing page', () => {
-  test('loads all sections', async ({ page }) => {
+test.describe('Landing redirect', () => {
+  test('/landing redirects to /', async ({ page }) => {
     await page.goto('/landing');
-    await expect(page.locator('h1')).toContainText('your language');
-    await expect(page.getByText('Five scenarios')).toBeVisible();
-    await expect(page.getByText('How it works')).toBeVisible();
-  });
-
-  test('scenario tabs work', async ({ page }) => {
-    await page.goto('/landing');
-    // Click School Board tab
-    await page.getByText('School Board').click();
-    await expect(page.getByText('Resolution 2026-0142')).toBeVisible();
-  });
-
-  test('passes accessibility checks', async ({ page }) => {
-    await page.goto('/landing');
-    await checkA11y(page, 'Landing');
+    await expect(page).toHaveURL('/');
   });
 });
 
 test.describe('Navigation', () => {
   test('nav bar is present on all pages', async ({ page }) => {
-    for (const path of ['/', '/upload', '/landing', '/brief/demo']) {
+    for (const path of ['/', '/upload', '/brief/demo']) {
       await page.goto(path);
       await expect(page.getByText('Civic Brief').first()).toBeVisible();
     }
@@ -138,6 +145,12 @@ test.describe('Navigation', () => {
     await page.goto('/');
     await page.click('a[href="/upload"]');
     await expect(page).toHaveURL('/upload');
+  });
+
+  test('footer has GitHub link', async ({ page }) => {
+    await page.goto('/');
+    const ghLink = page.locator('a[href="https://github.com/pateljatin/civic-brief"]').first();
+    await expect(ghLink).toBeVisible();
   });
 });
 

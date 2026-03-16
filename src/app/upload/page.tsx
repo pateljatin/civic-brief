@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import UploadForm from '@/components/UploadForm';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent, VerificationResult } from '@/lib/types';
@@ -32,12 +32,28 @@ export default function UploadPage() {
   const [translations, setTranslations] = useState<
     Record<string, { headline: string; content: CivicContent }>
   >({});
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [dailyLimit, setDailyLimit] = useState<number>(20);
+
+  // Fetch daily limit on mount
+  useEffect(() => {
+    fetch('/api/limit')
+      .then((r) => r.json())
+      .then((data) => {
+        setRemaining(data.remaining);
+        setDailyLimit(data.dailyLimit);
+      })
+      .catch(() => {});
+  }, []);
 
   function handleResult(data: UploadResult) {
     setResult(data);
     setCurrentLang('en');
+    // Decrement local remaining count
+    if (remaining !== null && !data.duplicate) {
+      setRemaining(Math.max(0, remaining - 1));
+    }
 
-    // Populate cached translations from the response
     const cached: Record<string, { headline: string; content: CivicContent }> = {};
     for (const t of data.translations) {
       if (t.headline && t.content) {
@@ -50,13 +66,11 @@ export default function UploadPage() {
   async function handleLanguageChange(lang: string) {
     if (lang === currentLang) return;
 
-    // If we already have it cached, just switch
     if (lang === 'en' || translations[lang]) {
       setCurrentLang(lang);
       return;
     }
 
-    // Otherwise, fetch the translation
     if (!result?.briefId) {
       setCurrentLang(lang);
       return;
@@ -88,7 +102,6 @@ export default function UploadPage() {
     }
   }
 
-  // Build available languages
   const availableLanguages = ['en'];
   if (result) {
     for (const t of result.translations) {
@@ -97,6 +110,8 @@ export default function UploadPage() {
       }
     }
   }
+
+  const limitReached = remaining !== null && remaining <= 0;
 
   return (
     <div className="container-narrow" style={{ paddingTop: '40px', paddingBottom: '80px' }}>
@@ -114,15 +129,68 @@ export default function UploadPage() {
         style={{
           fontSize: '16px',
           color: 'var(--muted)',
-          marginBottom: '32px',
+          marginBottom: '16px',
         }}
       >
         Drop a government PDF. Get a plain-language civic brief in seconds.
       </p>
 
-      <UploadForm onResult={handleResult} />
+      {/* Demo capacity indicator */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          background: limitReached ? '#fee2e2' : 'var(--warm)',
+          border: `1px solid ${limitReached ? '#fca5a5' : 'var(--border)'}`,
+          fontSize: '13px',
+          color: limitReached ? '#dc2626' : 'var(--muted)',
+          marginBottom: '24px',
+        }}
+      >
+        {remaining === null ? (
+          'Loading...'
+        ) : limitReached ? (
+          <>Daily demo limit reached. Try again tomorrow.</>
+        ) : (
+          <>{remaining} of {dailyLimit} demo uses remaining today</>
+        )}
+      </div>
 
-      {/* Show result */}
+      {limitReached ? (
+        <div
+          style={{
+            padding: '32px',
+            textAlign: 'center',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            background: 'var(--warm)',
+          }}
+        >
+          <div style={{ fontSize: '32px', marginBottom: '12px' }}>
+            {'\u{1F512}'}
+          </div>
+          <p style={{ fontSize: '16px', fontWeight: 500, marginBottom: '8px' }}>
+            Daily limit reached
+          </p>
+          <p style={{ fontSize: '14px', color: 'var(--muted)' }}>
+            This is a free demo with {dailyLimit} documents per day to manage costs.
+            Check back tomorrow, or{' '}
+            <a
+              href="/brief/demo"
+              style={{ color: 'var(--civic)', fontWeight: 500 }}
+            >
+              view a sample brief
+            </a>{' '}
+            to see how it works.
+          </p>
+        </div>
+      ) : (
+        <UploadForm onResult={handleResult} />
+      )}
+
       {result && (
         <div style={{ marginTop: '48px' }}>
           <h2

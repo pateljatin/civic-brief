@@ -67,7 +67,7 @@ export default function RootLayout({
               Upload
             </a>
             <a
-              href="/landing"
+              href="/brief/demo"
               style={{
                 fontSize: '14px',
                 fontWeight: 500,
@@ -75,7 +75,7 @@ export default function RootLayout({
                 transition: 'color 0.2s',
               }}
             >
-              About
+              Demo Brief
             </a>
             <a
               href="https://github.com/pateljatin/civic-brief"
@@ -131,10 +131,10 @@ export default function RootLayout({
               GitHub (MIT License)
             </a>
             <a
-              href="/landing"
+              href="/brief/demo"
               style={{ color: 'var(--muted)', fontWeight: 500, transition: 'color 0.2s' }}
             >
-              About
+              Demo Brief
             </a>
             <a
               href="/upload"
