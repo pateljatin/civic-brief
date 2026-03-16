@@ -288,6 +288,9 @@ export default function LandingPage() {
             <div key={badge} className="l-open-badge">{badge}</div>
           ))}
         </div>
+        <p style={{ marginTop: '28px', fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
+          Questions? <a href="mailto:civicbriefapp@gmail.com" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'underline' }}>civicbriefapp@gmail.com</a>
+        </p>
       </section>
 
     </>

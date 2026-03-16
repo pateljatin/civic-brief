@@ -178,6 +178,10 @@ Working demo in development. [Mozilla Foundation Democracy x AI Incubator 2026](
 
 This is an open-source civic infrastructure project. Contributions welcome. See the issues tab for current work.
 
+## Contact
+
+civicbriefapp@gmail.com
+
 ## License
 
 MIT

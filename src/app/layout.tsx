@@ -144,6 +144,12 @@ export default function RootLayout({
             >
               Upload
             </a>
+            <a
+              href="mailto:civicbriefapp@gmail.com"
+              style={{ color: 'var(--muted)', fontWeight: 500, transition: 'color 0.2s' }}
+            >
+              Contact
+            </a>
           </div>
           <div
             style={{
