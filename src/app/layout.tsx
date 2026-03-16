@@ -93,6 +93,67 @@ export default function RootLayout({
           </div>
         </nav>
         <main style={{ paddingTop: '60px' }}>{children}</main>
+        <footer
+          style={{
+            padding: '40px 24px',
+            textAlign: 'center',
+            borderTop: '1px solid var(--border)',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: '20px',
+              fontWeight: 800,
+              marginBottom: '6px',
+            }}
+          >
+            Civic Brief
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 300 }}>
+            Plain language for public power.
+          </div>
+          <div
+            style={{
+              marginTop: '16px',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '24px',
+              fontSize: '13px',
+            }}
+          >
+            <a
+              href="https://github.com/pateljatin/civic-brief"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--muted)', fontWeight: 500, transition: 'color 0.2s' }}
+            >
+              GitHub (MIT License)
+            </a>
+            <a
+              href="/landing"
+              style={{ color: 'var(--muted)', fontWeight: 500, transition: 'color 0.2s' }}
+            >
+              About
+            </a>
+            <a
+              href="/upload"
+              style={{ color: 'var(--muted)', fontWeight: 500, transition: 'color 0.2s' }}
+            >
+              Upload
+            </a>
+          </div>
+          <div
+            style={{
+              marginTop: '12px',
+              fontSize: '11px',
+              color: 'var(--muted)',
+              opacity: 0.5,
+            }}
+          >
+            Mozilla Foundation Democracy x AI Incubator 2026
+          </div>
+        </footer>
         <Analytics />
       </body>
     </html>

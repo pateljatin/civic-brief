@@ -148,38 +148,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer
-        style={{
-          padding: '40px 24px',
-          textAlign: 'center',
-          borderTop: '1px solid var(--border)',
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: '20px',
-            fontWeight: 800,
-            marginBottom: '6px',
-          }}
-        >
-          Civic Brief
-        </div>
-        <div style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 300 }}>
-          Plain language for public power.
-        </div>
-        <div
-          style={{
-            marginTop: '12px',
-            fontSize: '11px',
-            color: 'var(--muted)',
-            opacity: 0.5,
-          }}
-        >
-          Mozilla Foundation Democracy x AI Incubator 2026 &middot; Open source under MIT license
-        </div>
-      </footer>
     </div>
   );
 }

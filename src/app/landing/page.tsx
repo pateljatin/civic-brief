@@ -290,12 +290,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="l-footer">
-        <div className="l-f-logo">Civic Brief</div>
-        <div className="l-f-sub">Plain language for public power.</div>
-        <div className="l-f-moz">Mozilla Foundation Democracy x AI Incubator 2026 &middot; Working demo April 2026</div>
-      </footer>
     </>
   );
 }
@@ -425,11 +419,6 @@ const landingStyles = `
   .l-open p{font-size:17px;font-weight:300;color:rgba(255,255,255,0.55);max-width:560px;margin:0 auto 28px;}
   .l-open-badges{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
   .l-open-badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;}
-
-  .l-footer{padding:40px;text-align:center;border-top:1px solid var(--border);}
-  .l-f-logo{font-family:'Fraunces',serif;font-size:20px;font-weight:800;margin-bottom:6px;}
-  .l-f-sub{font-size:13px;color:var(--muted);font-weight:300;}
-  .l-f-moz{margin-top:12px;font-size:11px;color:var(--muted);opacity:0.5;}
 
   .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s,transform 0.7s;}
   .reveal.visible{opacity:1;transform:translateY(0);}
