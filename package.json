@@ -15,21 +15,21 @@
     "test:all": "vitest run && playwright test"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.79.0",
     "@supabase/ssr": "^0.9.0",
-    "@supabase/supabase-js": "^2.49.1",
-    "@vercel/analytics": "^1.5.0",
+    "@supabase/supabase-js": "^2.99.2",
+    "@vercel/analytics": "^2.0.1",
     "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "unpdf": "^0.12.1"
+    "unpdf": "^1.4.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@types/node": "^20.17.19",
+    "@types/node": "^22.15.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
