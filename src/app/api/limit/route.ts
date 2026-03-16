@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const DAILY_LIMIT = parseInt(process.env.DEMO_DAILY_LIMIT || '20', 10);
+const DAILY_LIMIT = parseInt(process.env.DEMO_DAILY_LIMIT || '10', 10);
 
 function safeGetDb() {
   try {

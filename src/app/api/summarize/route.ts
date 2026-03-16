@@ -9,7 +9,7 @@ import { rateLimit, validateUrl, validateFile, sanitizeText } from '@/lib/securi
 import type { CivicContent, VerificationResult } from '@/lib/types';
 
 const MAX_TEXT_LENGTH = 100_000; // ~25K words, well within Claude's context
-const DAILY_LIMIT = parseInt(process.env.DEMO_DAILY_LIMIT || '20', 10);
+const DAILY_LIMIT = parseInt(process.env.DEMO_DAILY_LIMIT || '10', 10);
 
 /** Check how many documents have been processed today. Returns remaining count. */
 async function checkDailyLimit(): Promise<{ remaining: number; allowed: boolean }> {
