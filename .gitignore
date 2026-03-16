@@ -37,9 +37,8 @@ test-results/
 playwright-report/
 coverage/
 
-# private research (founder decision docs, not for public repo)
-docs/research/LEGAL_STRUCTURE.md
-docs/research/OUTREACH_STRATEGY.md
+# private research (founder decisions, strategy, not for public repo)
+docs/research/private/
 
 # misc
 *.log
