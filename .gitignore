@@ -37,6 +37,10 @@ test-results/
 playwright-report/
 coverage/
 
+# private research (founder decision docs, not for public repo)
+docs/research/LEGAL_STRUCTURE.md
+docs/research/OUTREACH_STRATEGY.md
+
 # misc
 *.log
 npm-debug.log*
