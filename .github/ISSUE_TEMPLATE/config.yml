@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and Discussion
+    url: https://github.com/pateljatin/civic-brief/discussions
+    about: Ask questions or start a discussion about Civic Brief
+  - name: Email
+    url: mailto:civicbriefapp@gmail.com
+    about: Contact the team directly

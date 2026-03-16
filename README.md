@@ -133,10 +133,11 @@ npm run build
 
 ## Testing
 
-- **51 unit tests** covering components, PDF extraction, prompts, security, and types
-- **42 E2E tests** (21 specs across desktop and mobile viewports) covering page loads, navigation, form behavior, accessibility (WCAG 2.1 AA via axe-core), security headers, and mobile responsiveness
+- **71 unit tests** covering components, PDF extraction, prompts, security, types, and auth
+- **48 E2E tests** (24 specs across desktop and mobile viewports) covering page loads, navigation, form behavior, accessibility (WCAG 2.1 AA via axe-core), security headers, and mobile responsiveness
 - Accessibility scans on every page using axe-core
 - Security header verification in E2E
+- CI pipeline runs all checks on every PR (see `.github/workflows/ci.yml`)
 
 ## Project Structure
 
@@ -170,13 +171,42 @@ supabase/
   seed/                   # Demo data (jurisdictions, topics, languages)
 ```
 
+## Roadmap
+
+### Demo (April 2026) -- Complete
+- [x] PDF upload and in-memory extraction
+- [x] Civic-context summarization (Claude API)
+- [x] English and Spanish output
+- [x] LLM-as-Judge confidence scoring
+- [x] Source document verification links
+- [x] Google OAuth with usage tracking
+
+### Next: Trust Loop (June 2026)
+- [ ] Community verification UI
+- [ ] Automatic document feed ingestion
+- [ ] WhatsApp/SMS sharing
+
+### Later
+- [ ] Budget visualization and YoY comparison
+- [ ] Location-based subscriptions
+- [ ] International expansion
+
+See the [project board](https://github.com/pateljatin/civic-brief/projects) and [full roadmap](docs/ROADMAP.md) for detailed tracking.
+
 ## Status
 
-Working demo in development. [Mozilla Foundation Democracy x AI Incubator 2026](https://foundation.mozilla.org) applicant.
+Working demo live at [civic-brief.vercel.app](https://civic-brief.vercel.app). [Mozilla Foundation Democracy x AI Incubator 2026](https://foundation.mozilla.org) applicant.
 
 ## Contributing
 
-This is an open-source civic infrastructure project. Contributions welcome. See the issues tab for current work.
+This is an open-source civic infrastructure project. Contributions welcome.
+
+**Getting started:**
+1. Check the [issues tab](https://github.com/pateljatin/civic-brief/issues) for current work
+2. Issues labeled [`good first issue`](https://github.com/pateljatin/civic-brief/labels/good%20first%20issue) are a great starting point
+3. Every issue includes problem context, success criteria, and scope boundaries
+4. Use the issue templates when filing bugs or requesting features
+5. PRs are checked against our [product](docs/standards/PRODUCT_FUNDAMENTALS.md) and [engineering](docs/standards/ENGINEERING_FUNDAMENTALS.md) fundamentals
 
 ## Contact
 
