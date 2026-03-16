@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
-// Server-side client (service role, full access)
+// ─── Service Role Client (API routes, full access, bypasses RLS) ───
 let serverClient: SupabaseClient | null = null;
 
 export function getServerClient(): SupabaseClient {
@@ -21,7 +22,7 @@ export function getServerClient(): SupabaseClient {
   return serverClient;
 }
 
-// Browser-side client (anon key, RLS-restricted)
+// ─── Browser Client (client components, auth-aware, RLS-restricted) ───
 let browserClient: SupabaseClient | null = null;
 
 export function getBrowserClient(): SupabaseClient {
@@ -35,7 +36,7 @@ export function getBrowserClient(): SupabaseClient {
       );
     }
 
-    browserClient = createClient(url, anonKey);
+    browserClient = createBrowserClient(url, anonKey);
   }
   return browserClient;
 }

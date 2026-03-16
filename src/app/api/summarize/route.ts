@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { extractTextFromPDF, hashText, PDFExtractionError } from '@/lib/pdf-extract';
 import { generateJSON, MODEL, PROMPT_VERSION } from '@/lib/anthropic';
 import { getServerClient } from '@/lib/supabase';
+import { createAuthServerClient } from '@/lib/supabase-server';
 import { CIVIC_SUMMARIZE_SYSTEM, CIVIC_SUMMARIZE_USER } from '@/lib/prompts/civic-summarize';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
@@ -46,6 +47,18 @@ export async function POST(request: NextRequest) {
       { status: 429 }
     );
   }
+
+  // Extract authenticated user (optional, works without auth)
+  let userId: string | null = null;
+  try {
+    const authClient = await createAuthServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    userId = user?.id ?? null;
+  } catch {
+    // Auth not configured or no session, continue anonymously
+  }
+
+  const startTime = Date.now();
 
   try {
     const formData = await request.formData();
@@ -198,6 +211,7 @@ export async function POST(request: NextRequest) {
           confidence_level: verification.confidence_level,
           requires_review: verification.confidence_level === 'low',
           status: 'processed',
+          ...(userId ? { submitted_by: userId } : {}),
         })
         .select('id')
         .single();
@@ -251,6 +265,16 @@ export async function POST(request: NextRequest) {
 
       if (esError) throw esError;
 
+      // Log usage event (fire and forget)
+      logUsageEvent(db, {
+        userId,
+        eventType: 'summarize',
+        sourceId: source.id,
+        briefId: enBrief.id,
+        success: true,
+        latencyMs: Date.now() - startTime,
+      });
+
       return NextResponse.json({
         sourceId: source.id,
         briefId: enBrief.id,
@@ -293,6 +317,34 @@ export async function POST(request: NextRequest) {
       error instanceof Error ? error.message : 'An unexpected error occurred';
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+/** Log a usage event to the database (non-blocking). */
+function logUsageEvent(
+  db: ReturnType<typeof getServerClient>,
+  event: {
+    userId: string | null;
+    eventType: string;
+    sourceId?: string;
+    briefId?: string;
+    success: boolean;
+    errorMessage?: string;
+    latencyMs?: number;
+  }
+) {
+  Promise.resolve(
+    db.from('usage_events').insert({
+      user_id: event.userId,
+      event_type: event.eventType,
+      source_id: event.sourceId,
+      brief_id: event.briefId,
+      success: event.success,
+      error_message: event.errorMessage,
+      latency_ms: event.latencyMs,
+    })
+  ).catch((err: unknown) => {
+    console.error('Failed to log usage event:', err);
+  });
 }
 
 /** Returns the Supabase client or null if not configured. */

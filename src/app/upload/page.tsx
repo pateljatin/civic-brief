@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getBrowserClient } from '@/lib/supabase';
 import UploadForm from '@/components/UploadForm';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent, VerificationResult } from '@/lib/types';
+import type { User } from '@supabase/supabase-js';
 
 interface UploadResult {
   sourceId: string | null;
@@ -33,9 +35,10 @@ export default function UploadPage() {
     Record<string, { headline: string; content: CivicContent }>
   >({});
   const [remaining, setRemaining] = useState<number | null>(null);
-  const [dailyLimit, setDailyLimit] = useState<number>(20);
+  const [dailyLimit, setDailyLimit] = useState<number>(10);
+  const [user, setUser] = useState<User | null>(null);
 
-  // Fetch daily limit on mount
+  // Fetch daily limit and auth state on mount
   useEffect(() => {
     fetch('/api/limit')
       .then((r) => r.json())
@@ -44,6 +47,16 @@ export default function UploadPage() {
         setDailyLimit(data.dailyLimit);
       })
       .catch(() => {});
+
+    // Check auth state
+    try {
+      const supabase = getBrowserClient();
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setUser(user ?? null);
+      });
+    } catch {
+      // Supabase not configured
+    }
   }, []);
 
   function handleResult(data: UploadResult) {
@@ -158,6 +171,19 @@ export default function UploadPage() {
           <>{remaining} of {dailyLimit} demo uses remaining today</>
         )}
       </div>
+
+      {/* Sign-in nudge for anonymous users */}
+      {!user && !limitReached && remaining !== null && (
+        <div
+          style={{
+            fontSize: '13px',
+            color: 'var(--muted)',
+            marginBottom: '24px',
+          }}
+        >
+          Sign in to track your briefs and get higher limits.
+        </div>
+      )}
 
       {limitReached ? (
         <div

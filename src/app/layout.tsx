@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/react';
+import AuthButton from '@/components/AuthButton';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -90,6 +91,7 @@ export default function RootLayout({
             >
               GitHub
             </a>
+            <AuthButton />
           </div>
         </nav>
         <main style={{ paddingTop: '60px' }}>{children}</main>

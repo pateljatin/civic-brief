@@ -53,3 +53,24 @@ h1, h2, h3, h4 {
   margin: 0 auto;
   padding: 0 24px;
 }
+
+/* ── Mobile responsive adjustments ── */
+@media (max-width: 640px) {
+  /* Nav: tighter padding, smaller gap */
+  nav {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  nav > div:last-child {
+    gap: 14px !important;
+  }
+  nav a {
+    font-size: 13px !important;
+  }
+
+  /* Footer: stack links vertically on very small screens */
+  footer > div:nth-child(3) {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+}
