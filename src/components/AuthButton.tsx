@@ -26,14 +26,25 @@ export default function AuthButton() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function handleSignIn() {
-    const supabase = getBrowserClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+  function handleSignIn() {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    // CSRF protection: random state stored in a cookie, verified in callback
+    const state = crypto.randomUUID();
+    document.cookie = `oauth_state=${state}; path=/; max-age=600; SameSite=Lax; Secure`;
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: `${window.location.origin}/auth/callback`,
+      response_type: 'code',
+      scope: 'openid email profile',
+      access_type: 'offline',
+      prompt: 'consent',
+      state,
     });
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   }
 
   async function handleSignOut() {

@@ -42,7 +42,7 @@ const nextConfig = {
               "connect-src 'self' https://*.supabase.co https://va.vercel-scripts.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://accounts.google.com",
             ].join('; '),
           },
         ],
