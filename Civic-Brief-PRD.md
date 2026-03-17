@@ -1,6 +1,6 @@
-# Civic Brief Spec Kit
+# Civic Brief PRD
 
-A product requirements document combining Rumelt's Strategy Kernel for strategic clarity with Socratic questioning for requirements rigor. This is the living spec for Civic Brief, from demo through Tier II Mozilla funding.
+The living product spec for Civic Brief.
 
 ---
 
@@ -10,11 +10,11 @@ A product requirements document combining Rumelt's Strategy Kernel for strategic
 
 The civic information supply chain is broken at every link.
 
-**The production gap.** 3,500+ US newspapers closed in 20 years. 213 counties have zero local news coverage. The institutions that translated government documents into public understanding are gone.
+**The production gap.** Close to 3,500 US newspapers have closed since 2005. 212 counties have zero local news coverage. 50 million Americans have limited access to local news. The institutions that translated government documents into public understanding are gone. ([Northwestern Medill, State of Local News 2025](https://localnewsinitiative.northwestern.edu/projects/state-of-local-news/2025/report/))
 
-**The accessibility gap.** Government documents are published but functionally invisible. A 400-page budget PDF is "public" in the legal sense but private in the practical sense. Fewer than 1% of residents read them.
+**The accessibility gap.** Government documents are published but functionally invisible. A 400-page budget PDF is "public" in the legal sense but private in the practical sense. Only 20% of Americans express confidence they understand local government spending decisions. ([GFOA](https://www.gfoa.org/materials/public-engagement-in-the-budget-process))
 
-**The language gap.** 67 million Americans speak a language other than English at home. 4+ billion people globally live where civic information is published in a language they do not read fluently. Government translation, when it exists, is delayed weeks or never completed.
+**The language gap.** 67.8 million Americans speak a language other than English at home ([US Census Bureau, ACS 2019](https://www.census.gov/library/stories/2022/12/languages-we-speak-in-united-states.html)). 40% of the global population lack access to information in languages they speak fluently ([UNESCO](https://www.unesco.org/en/articles/language-barriers-education)). Government translation, when it exists, is delayed weeks or never completed.
 
 **The trust gap.** Generic AI summarization does not earn civic trust. Getting civic information wrong is not a quality issue; it is a democratic harm. No existing tool combines structured civic interpretation with independent factuality verification.
 
@@ -148,7 +148,7 @@ The document already contains the answers. No new data collection is needed. The
 
 | Alternative | Why not |
 |-------------|---------|
-| Hire journalists to cover every budget | Does not scale. 19,000+ municipalities. |
+| Hire journalists to cover every budget | Does not scale. 19,500+ municipalities ([US Census Bureau, 2012](https://www.census.gov/newsroom/releases/archives/governments/cb12-161.html)). |
 | Train citizens to read budgets | Noble but unrealistic. Requires expertise and hours. |
 | Government-produced summaries | Conflict of interest. Governments summarize favorably. |
 | Generic AI summarization (ChatGPT, etc.) | Does not ask civic questions. "Summarize this" is not "what happens to my taxes?" |
@@ -495,7 +495,7 @@ Upload bill text PDF, get civic brief. This works today. Future: bill tracking t
 Civic information is published in the dominant language. Non-dominant-language speakers are excluded from democratic participation not by law but by language.
 
 **Who experiences this most acutely?**
-Spanish speakers in the US (42 million). Hindi speakers in English-medium Indian states. Any community where the government publishes in a language the majority does not read fluently.
+Spanish speakers in the US (41.8 million, [US Census Bureau ACS 2019](https://www.census.gov/library/stories/2022/12/languages-we-speak-in-united-states.html)). Hindi speakers in English-medium Indian states. Any community where the government publishes in a language the majority does not read fluently.
 
 **What is the cost of NOT solving this?**
 Entire communities are governed without their understanding or input. Public hearings have no participation from affected non-English speakers. Decisions about housing, schools, and infrastructure are made without the people most affected.
@@ -634,9 +634,9 @@ Ordered by flywheel impact, answering "why build this RIGHT NOW?"
 
 Three converging forces:
 
-1. **LLM capability threshold crossed.** Claude Sonnet 4 reliably produces structured JSON from dense legal text with 92%+ factuality. This was not possible 18 months ago. The prompting techniques for civic context are novel and not easily replicated.
+1. **LLM capability threshold crossed.** Claude Sonnet 4 reliably produces structured JSON from dense legal text with 88-93% factuality (verified across 4 real government PDFs in end-to-end testing, March 2026). This was not possible 18 months ago. The prompting techniques for civic context are novel and not easily replicated.
 
-2. **Local news collapse accelerating.** The gap between government document publication and public understanding widens every year. Each newspaper closure removes a translator. The need is growing faster than any human institution can fill it.
+2. **Local news collapse accelerating.** 148 newspapers closed in the past year alone. Web traffic to the 100 largest newspapers dropped 45% in four years. The gap between government document publication and public understanding widens every year. ([Northwestern Medill, 2025](https://localnewsinitiative.northwestern.edu/projects/state-of-local-news/2025/report/))
 
 3. **Mozilla Democracy x AI funding.** $50K seed with $250K follow-on is catalytic capital for an open-source tool. The grant validates the approach and provides runway to prove the flywheel.
 
@@ -706,7 +706,7 @@ GitHub Labels (for filtering):
 ```markdown
 ## Feature: [name]
 
-**ID:** C[number] from spec-kit.md
+**ID:** C[number] from Civic-Brief-PRD.md
 **Phase:** [1/2/3]
 **Scenarios:** [which scenarios this serves]
 

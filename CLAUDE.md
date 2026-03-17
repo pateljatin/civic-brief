@@ -204,6 +204,13 @@ The model is instructed to ONLY use source text, never general knowledge. Every 
 - Oxford comma. US English.
 - Write like a builder, not a marketer.
 
+### Data Claims and Sourcing
+- Every quantitative claim (statistics, percentages, dollar amounts, counts) MUST include an inline source citation with author/org, year, and URL.
+- Never fabricate or estimate statistics. If a data point cannot be verified, say so or remove it.
+- Prefer primary sources (Census Bureau, peer-reviewed research, official reports) over secondary reporting.
+- When citing our own testing results, specify the test date and methodology.
+- Format: "claim ([Source Name, Year](URL))" inline with the text.
+
 ### Vercel Analytics
 The Next.js app includes @vercel/analytics in layout.tsx. The original landing page script tag is preserved in landing-static.html.
 
