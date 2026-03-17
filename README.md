@@ -1,5 +1,12 @@
 # Civic Brief
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Mozilla Incubator](https://img.shields.io/badge/Mozilla-Democracy%20x%20AI-ff6611.svg)](https://foundation.mozilla.org)
+[![Built with Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-71%20passing-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pateljatin/civic-brief/pulls)
+
 **Plain language for public power.**
 
 An open-source platform that turns government budgets, legislation, and policy documents into plain-language civic intelligence, in the languages communities actually speak.
