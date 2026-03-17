@@ -137,7 +137,7 @@ Residents cannot determine how government spending decisions affect them persona
 Homeowners with fixed incomes (property tax increases hit hardest), parents (school funding changes affect their kids), and small business owners (commercial assessments and fee changes).
 
 **What is the cost of NOT solving this?**
-Budget decisions are made without meaningful public input. Comment periods pass with 2-3 attendees. Property tax surprises arrive as bills. Service cuts happen invisibly. Elected officials face no accountability for spending decisions because the public does not understand them.
+Budget decisions are made without meaningful public input. Only 30% of residents feel local government is transparent about budget decisions ([Euna Solutions, 2024](https://eunasolutions.com/resources/how-local-governments-can-align-budgets-with-community-needs/)). Comment periods pass with 2-3 attendees. Property tax surprises arrive as bills. Service cuts happen invisibly. When residents can participate (e.g., NYC's participatory budgeting), 99,250+ residents engaged and $210M was allocated across 706 community-chosen projects ([NYC Council, 2012-2024](https://www.participatorybudgeting.org/participatory-budgeting-in-nyc/)).
 
 #### Solution Validation
 
@@ -242,10 +242,10 @@ Year-over-year comparison and budget visualization. Keep the core: upload budget
 Parents learn about school board decisions after the comment period closes. Board resolutions are dense legal documents. Meeting times (weekday evenings) exclude working parents.
 
 **Who experiences this most acutely?**
-Working parents who cannot attend meetings, especially single parents and those working multiple jobs. Also: non-English-speaking parents in diverse school districts.
+Working parents who cannot attend meetings, especially single parents and those working multiple jobs. Only 22% of public school parents attended a school board meeting in the past year ([PDK Poll, 2024](https://pdkpoll.org/2024-poll-results/)). Also: non-English-speaking parents in diverse school districts.
 
 **What is the cost of NOT solving this?**
-Decisions about bus routes, curricula, facility closures, and teacher contracts are made without parent input. Parents discover changes when their child's pickup time shifts or their school closes. Trust in public education erodes.
+16,201 school districts with 90,000+ board members control $600 billion annually ([Research.com, 2024](https://research.com/education/american-school-statistics)). Decisions about bus routes, curricula, facility closures, and teacher contracts are made without parent input. Parents discover changes when their child's pickup time shifts or their school closes. The stakes are real: 80% of students with highly involved parents pursue college vs. 56% with uninvolved parents ([APA, 2019](https://www.aecf.org/blog/parental-involvement-is-key-to-student-success-research-shows)).
 
 #### Solution Validation
 
@@ -329,7 +329,7 @@ Homeowners do not know their block is being rezoned until construction starts. Z
 Adjacent property owners. Their home values, street parking, noise levels, and neighborhood character change based on decisions they did not know about.
 
 **What is the cost of NOT solving this?**
-Zoning decisions are made with minimal public input. The typical public comment on a zoning amendment gets 2-3 responses. Developers know this and exploit it. Residents feel blindsided and lose trust in local government.
+Zoning decisions are made with minimal public input. The typical public comment on a zoning amendment gets 2-3 responses. Developers know this and exploit it. Restrictive zoning increases house values by 17-69% depending on location ([Regional Science and Urban Economics, 2025](https://www.sciencedirect.com/science/article/abs/pii/S009411902500049X)). Residents feel blindsided and lose trust in local government. Current notification methods (newspaper legal ads, mailed notices to property owners only) fail to reach renters and younger residents entirely ([APA, 2024](https://www.planning.org/zoningpractice/2024/may/an-equitable-approach-to-zoning-notifications/)).
 
 #### Solution Validation
 
@@ -413,7 +413,7 @@ Bills are written in legal language. Media coverage focuses on partisan framing 
 Citizens directly affected by specific legislation (homeowners for housing bills, patients for health bills, workers for labor bills) who lack legal training to interpret bill text.
 
 **What is the cost of NOT solving this?**
-Legislation is decided by lobbyists and advocates who understand bill text. The public participates through partisan signaling, not informed input. Comment periods on proposed rules receive industry responses but not citizen responses.
+80% of Americans cannot name their state legislator ([Johns Hopkins, 2018](https://www.route-fifty.com/management/2018/12/knowledge-gaps-state-government/153452/)). State legislatures introduce 246,405 bills per session, 12.7x more than Congress ([MultiState, 2024](https://www.multistate.us/insider/2024/12/11/state-lawmakers-introduce-over-a-quarter-million-bills-each-season)). Legislation is decided by lobbyists and advocates who understand bill text. The public participates through partisan signaling, not informed input.
 
 #### Solution Validation
 
@@ -498,7 +498,7 @@ Civic information is published in the dominant language. Non-dominant-language s
 Spanish speakers in the US (41.8 million, [US Census Bureau ACS 2019](https://www.census.gov/library/stories/2022/12/languages-we-speak-in-united-states.html)). Hindi speakers in English-medium Indian states. Any community where the government publishes in a language the majority does not read fluently.
 
 **What is the cost of NOT solving this?**
-Entire communities are governed without their understanding or input. Public hearings have no participation from affected non-English speakers. Decisions about housing, schools, and infrastructure are made without the people most affected.
+25.7 million Americans have limited English proficiency ([Migration Policy Institute, 2021](https://www.migrationpolicy.org/research/limited-english-proficient-individuals-united-states-number-share-growth-and-linguistic)), a population that grew 80% since 1990. When language access is provided, civic participation increases dramatically: Native American voter turnout increased 50-150%, and Latino/Filipino registrations rose 20%+ ([AAJC](https://www.advancingjustice-aajc.org/sites/default/files/policymaker-full5.pdf)). Without it, entire communities are governed without their understanding or input.
 
 #### Solution Validation
 
