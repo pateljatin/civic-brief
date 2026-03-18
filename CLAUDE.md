@@ -35,7 +35,7 @@ A user uploads a government PDF (budget, resolution, policy document). The syste
 
 ## TECH STACK
 
-- **Framework:** Next.js 16.1.6 (App Router, Turbopack)
+- **Framework:** Next.js 16.1.7 (App Router, Turbopack)
 - **Language:** TypeScript (strict mode)
 - **Runtime:** React 19.2.4
 - **Database:** Supabase (Postgres + PostGIS + pg_trgm). No Auth, no Storage for demo.
@@ -214,6 +214,20 @@ The model is instructed to ONLY use source text, never general knowledge. Every 
 ### Vercel Analytics
 The Next.js app includes @vercel/analytics in layout.tsx. The original landing page script tag is preserved in landing-static.html.
 
+### Development Workflow (Superpowers Plugin)
+Use the Superpowers plugin skills for all non-trivial development work:
+- **subagent-driven-development**: Dispatch subagents per task with 2-stage review (spec compliance, then code quality). Use for any feature with 3+ files or steps.
+- **test-driven-development**: RED-GREEN-REFACTOR. Write failing test first, then minimal code to pass, then refactor. No exceptions for new features.
+- **brainstorming**: Before coding any new feature, refine requirements through Socratic questioning. Don't jump to implementation.
+- **writing-plans**: Break work into 2-5 minute tasks with exact file paths, complete code, and verification steps.
+- **systematic-debugging**: For bugs, use the 4-phase root cause process. No guessing.
+- **verification-before-completion**: Verify the fix actually works before declaring done.
+
+When NOT to use Superpowers (provide reasoning if skipping):
+- Single-line fixes (typos, config tweaks, version bumps)
+- Pure research or exploration tasks
+- Documentation-only changes with no code impact
+
 ### Git Practices
 - Meaningful commit messages. Not "update" or "fix".
 - Main branch is always deployable.
@@ -251,31 +265,26 @@ Key differences from Next.js 14 (important for future development):
 
 ---
 
-## CURRENT STATE (March 15, 2026)
+## CURRENT STATE (March 17, 2026)
 
-- App code: BUILT. All pages, API routes, components, and database schema complete.
-- Testing: 51 unit tests passing, 42 E2E tests passing.
-- Supabase: Connected. All seed data loaded (1 country, 6 jurisdictions, 3 languages, 8 topics, 11 doc types).
-- Anthropic API: Connected and verified.
-- Landing page: Ported to /landing route.
-- Build: `npm run build` passes clean.
+- **Demo v1: COMPLETE.** All 6 features (C1-C6) shipped and closed.
+- **Live:** civic-brief.vercel.app (auto-deploys from main)
+- **Testing:** 71 unit tests passing (vitest), 48/48 E2E passing (Playwright), 0 npm vulnerabilities.
+- **Next.js:** 16.1.7 with Turbopack
+- **PDF testing:** 4 real government PDFs tested (88-93% confidence, 0 hallucinations)
+- **GitHub:** 26 issues, 4 milestones, project board linked. 8 closed, 18 open.
+- **Docs:** PRD (Civic-Brief-PRD.md), FORCivicBrief.md, CI pipeline, issue templates, PR template all in place.
 
-### Remaining before April 15
-- Test with real government PDFs end-to-end
-- Mobile responsive polish
-- Git commit and push (triggers Vercel deploy)
-- README update for Mozilla reviewers
-- FORCivicBrief.md project documentation
+### Next milestone: v1.1 Trust Loop (June 1, 2026)
+- C7: Automatic document feed ingestion (Critical)
+- C8: Community verification UI (Critical)
+- C10: WhatsApp/SMS sharing (High)
+- C14: PostGIS brief tagging (High)
+- #12: Vercel preview environments (Medium)
 
-### Future phases (post-demo)
-- Budget parsing and visualization
-- Community verification UI
-- Document feed monitoring (RSS/API)
-- Topic subscriptions and notifications
-- User accounts and saved jurisdictions
-- PostGIS boundary polygons for all US states
-- pgvector semantic search
-- International jurisdiction trees (India, Nigeria, UK)
+### Future milestones
+- v1.2 Subscriptions (Sep 2026): Location alerts, budget viz, bill tracking, notifications
+- v2.0 Scale (Mar 2027): International expansion, semantic search, newsroom embed, map viz
 
 ---
 
