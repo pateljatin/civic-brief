@@ -1,0 +1,14 @@
+{
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/summarize/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/translate/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/verify/route.ts": {
+      "maxDuration": 120
+    }
+  }
+}

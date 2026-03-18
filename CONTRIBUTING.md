@@ -1,91 +1,113 @@
 # Contributing to Civic Brief
 
-Thanks for considering a contribution to Civic Brief. This is an open-source civic infrastructure project. Every contribution helps make government information more accessible.
+Thanks for your interest in helping make civic information accessible. This guide covers how to set up, develop, and submit contributions.
 
-## Quick Start
+## Getting Started
+
+### Prerequisites
+
+- Node.js 22+
+- npm
+- A [Supabase](https://supabase.com) project (free tier works)
+- An [Anthropic API key](https://console.anthropic.com) (for testing summarization)
+
+### Local Setup
+
+1. Fork this repo and clone your fork:
 
 ```bash
-# Fork and clone
 git clone https://github.com/YOUR_USERNAME/civic-brief.git
 cd civic-brief
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Fill in: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
-#          NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
-
-# Run development server
-npm run dev
-
-# Run tests
-npm test          # Unit tests (vitest)
-npm run test:e2e  # E2E tests (Playwright)
-npm run typecheck # TypeScript strict mode
 ```
 
-The app runs at `http://localhost:3000`. The `/brief/demo` page works without any API keys.
+2. Install dependencies:
 
-## Finding Work
+```bash
+npm install
+```
 
-- **[Good first issues](https://github.com/pateljatin/civic-brief/labels/good%20first%20issue)** are a great starting point
-- Every issue includes problem context, success criteria, and scope boundaries
-- Check the [project board](https://github.com/users/pateljatin/projects/1) for current priorities
-- If an issue interests you, comment on it before starting work so we can avoid duplication
+3. Create `.env.local` with your keys:
 
-## Making Changes
+```
+ANTHROPIC_API_KEY=your_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
-1. Create a feature branch from `main`
-2. Write tests alongside your implementation (not after)
-3. Run the full test suite before submitting: `npm test && npm run typecheck && npm run build`
-4. Submit a PR using the pull request template
+4. Start the dev server:
+
+```bash
+npm run dev
+```
+
+The app runs at `http://localhost:3000`.
+
+## Development Workflow
+
+We use **GitHub Flow**: feature branches off `main`, pull requests back to `main`.
+
+1. Create a feature branch from `main`:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+2. Make your changes. Run checks locally:
+
+```bash
+npm run typecheck    # TypeScript checks
+npm test             # Unit tests (vitest)
+npm run test:e2e     # E2E tests (Playwright)
+```
+
+3. Commit with a meaningful message. Push to your fork:
+
+```bash
+git push origin feature/your-feature-name
+```
+
+4. Open a pull request targeting `main`. Fill out the PR template.
+
+### What Happens When You Open a PR
+
+- **CI runs automatically**: TypeScript check, unit tests, build, E2E tests. All must pass.
+- **Vercel deploys a preview**: PRs from repo branches get a unique preview URL with full functionality. The Vercel bot comments the link on your PR.
+- **Review required**: At least one maintainer approval before merge.
+
+**Note for fork PRs**: Vercel preview deployments from forks do not receive environment variables (security measure). Your CI tests still run via GitHub Actions. If a maintainer needs to test your PR with a full preview, they will pull your branch to the origin repo.
 
 ## Code Standards
 
-- **TypeScript strict mode** is enabled. No `any` types except documented Supabase join workarounds.
-- **Tests required** for all business logic (vitest) and user-facing flows (Playwright).
-- **Accessibility**: axe-core scans must pass. Keyboard navigable. WCAG 2.1 AA.
-- **Security review** required on any PR touching auth, API routes, or data handling.
+- **TypeScript strict mode**. No `any` unless truly unavoidable.
+- **Tests required** for new features. We use vitest for unit tests and Playwright + axe-core for E2E.
+- **Accessibility**: All pages must pass axe-core WCAG 2.1 AA scans.
+- **No AI jargon** in user-facing text. No "AI-powered", "leverage", "seamless", "robust". Write like a builder.
+- **No em-dashes**. Use commas, periods, or semicolons.
+- **Data sourcing**: Every quantitative claim needs an inline citation with source, year, and URL.
 
-See [Engineering Fundamentals](docs/standards/ENGINEERING_FUNDAMENTALS.md) for full details.
+## Project Structure
 
-## PR Checklist
+```
+src/
+  app/           # Next.js App Router pages and API routes
+  lib/           # Shared utilities (API clients, PDF extraction, security)
+  lib/prompts/   # Civic summarization, translation, verification prompts
+  components/    # React components
+tests/
+  unit/          # Vitest unit tests
+  e2e/           # Playwright E2E tests
+supabase/
+  migrations/    # Database schema
+  seed/          # Seed data (jurisdictions, topics, etc.)
+```
 
-Every PR is checked against our [product fundamentals](docs/standards/PRODUCT_FUNDAMENTALS.md):
+See `CLAUDE.md` for detailed architecture documentation.
 
-- [ ] Security: input validation, no secrets exposed, OWASP reviewed
-- [ ] Privacy: no PII stored/logged, no new tracking, documents still processed in memory only
-- [ ] Accessibility: axe-core passes, keyboard navigable
-- [ ] Tests: unit and/or E2E tests added, all passing
-- [ ] Build: `npm run build` succeeds
+## Reporting Issues
 
-## What We Need Help With
-
-| Area | Skills | Examples |
-|------|--------|---------|
-| **i18n / Translation** | Native speakers, translation experience | Verify Spanish civic terminology, add Hindi UI strings, add new language prompts |
-| **Accessibility** | WCAG knowledge, screen reader testing | Improve contrast, add ARIA labels, keyboard navigation |
-| **Frontend** | React 19, Next.js, CSS | Mobile responsive polish, loading states, component improvements |
-| **AI / Prompts** | Prompt engineering, LLM evaluation | Improve civic-context prompts, tune verification scoring |
-| **Civic Domain** | Government document experience | Review summaries for accuracy, suggest new document types |
-| **Testing** | Vitest, Playwright | Add test coverage, edge cases, real PDF testing |
-| **Documentation** | Technical writing | Improve inline docs, add code examples, tutorials |
-
-## Writing Style
-
-For any user-facing text or documentation:
-- No AI jargon or buzzwords
-- Never use: "AI-powered", "leverage", "ecosystem", "seamless", "robust", "revolutionary"
-- Oxford comma. US English.
-- Write like a builder, not a marketer.
-
-## Questions?
-
-- Open a [GitHub Discussion](https://github.com/pateljatin/civic-brief/discussions)
-- Email: civicbriefapp@gmail.com
+Use the [issue templates](https://github.com/pateljatin/civic-brief/issues/new/choose) for bug reports and feature requests.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
