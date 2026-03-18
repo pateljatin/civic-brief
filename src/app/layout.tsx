@@ -159,7 +159,7 @@ export default function RootLayout({
               opacity: 0.5,
             }}
           >
-            Mozilla Foundation Democracy x AI Incubator 2026
+            &copy; {new Date().getFullYear()} Civic Brief
           </div>
         </footer>
         <Analytics />
