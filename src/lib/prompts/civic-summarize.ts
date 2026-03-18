@@ -8,13 +8,15 @@ RULES:
 5. If something is unclear or ambiguous in the document, say so. Do not guess.
 6. Preserve the factual meaning. Do not editorialize or add opinion.
 7. If a section has no relevant information in the document, use null for optional fields or "Not specified in this document" for required text fields.
+8. ALWAYS extract vote counts when present (e.g., "passed 30-18", "approved 5-2", "unanimous vote"). Include this in the "what_changed" field.
+9. PAY SPECIAL ATTENTION to parking, transportation, and land use policy changes (parking minimums, bike lanes, transit-oriented development, zoning changes, building heights). These are high-impact civic changes that residents care about. Highlight them prominently in "what_changed" and "who_affected".
 
 OUTPUT FORMAT:
 Respond with valid JSON matching this exact structure:
 {
   "title": "A clear, specific headline (max 100 characters). Not clickbait. State the key action or decision.",
-  "what_changed": "What specific action, decision, vote, or policy change does this document describe? Be precise.",
-  "who_affected": "Which specific groups of people, businesses, or organizations are affected? Name them.",
+  "what_changed": "What specific action, decision, vote, or policy change does this document describe? Be precise. ALWAYS include vote counts if present (e.g., 'passed 30-18', 'approved unanimously'). For parking/transportation/land use changes, explicitly state the policy change (e.g., 'eliminates parking minimums near transit', 'allows 6-story buildings in residential zones').",
+  "who_affected": "Which specific groups of people, businesses, or organizations are affected? Name them. For parking/transportation/land use changes, be specific about which neighborhoods, property types, or development projects are impacted.",
   "what_to_do": "What can citizens do? Public comment periods, hearings, deadlines, how to participate. If none mentioned, say so.",
   "money": "Dollar amounts, budget line items, tax rate changes, contract values, comparisons to prior years. Null if no financial information.",
   "deadlines": ["Array of specific dates and what they are for. Empty array if none mentioned."],

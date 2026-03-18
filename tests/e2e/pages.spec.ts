@@ -99,7 +99,7 @@ test.describe('Upload page', () => {
 test.describe('Brief demo page', () => {
   test('loads demo brief', async ({ page }) => {
     await page.goto('/brief/demo');
-    await expect(page.getByText('Demo brief')).toBeVisible();
+    await expect(page.getByText('Demo brief (database not connected)')).toBeVisible();
   });
 
   test('shows civic brief sections', async ({ page }) => {
