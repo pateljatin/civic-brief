@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import CivicBrief from '@/components/CivicBrief';
-import type { CivicContent } from '@/lib/types';
+import type { CivicContent, FeedbackType } from '@/lib/types';
 
 // Mock data for when Supabase is not configured
 const MOCK_BRIEF = {
@@ -97,6 +97,46 @@ async function getBrief(id: string) {
   return null;
 }
 
+async function getFeedbackData(briefId: string) {
+  try {
+    const { getServerClient } = await import('@/lib/supabase');
+    const db = getServerClient();
+
+    const { count: helpfulCount } = await db
+      .from('community_feedback')
+      .select('*', { count: 'exact', head: true })
+      .eq('brief_id', briefId)
+      .eq('feedback_type', 'helpful');
+
+    let isSignedIn = false;
+    let userFeedback: FeedbackType | undefined;
+
+    try {
+      const { createAuthServerClient } = await import('@/lib/supabase-server');
+      const authClient = await createAuthServerClient();
+      const { data: { user } } = await authClient.auth.getUser();
+      if (user) {
+        isSignedIn = true;
+        const { data: existing } = await db
+          .from('community_feedback')
+          .select('feedback_type')
+          .eq('brief_id', briefId)
+          .eq('user_id', user.id)
+          .neq('feedback_type', 'helpful')
+          .limit(1)
+          .maybeSingle();
+        userFeedback = (existing?.feedback_type as FeedbackType) || undefined;
+      }
+    } catch {
+      // Auth not available
+    }
+
+    return { helpfulCount: helpfulCount || 0, isSignedIn, userFeedback };
+  } catch {
+    return { helpfulCount: 0, isSignedIn: false, userFeedback: undefined };
+  }
+}
+
 export default async function BriefPage({ params }: PageProps) {
   const { id } = await params;
   const result = await getBrief(id);
@@ -131,6 +171,10 @@ export default async function BriefPage({ params }: PageProps) {
           confidenceLevel={MOCK_BRIEF.confidenceLevel}
           currentLanguage="en"
           availableLanguages={['en', 'es']}
+          briefId="demo"
+          helpfulCount={0}
+          isSignedIn={false}
+          isDemo={true}
         />
       </div>
     );
@@ -167,6 +211,8 @@ export default async function BriefPage({ params }: PageProps) {
     confidence_level: 'high' | 'medium' | 'low';
   };
 
+  const feedbackData = await getFeedbackData(briefData.id || id);
+
   return (
     <div className="container-narrow" style={{ paddingTop: '40px', paddingBottom: '80px' }}>
       <CivicBrief
@@ -179,6 +225,10 @@ export default async function BriefPage({ params }: PageProps) {
         currentLanguage={briefData.languages?.bcp47 || 'en'}
         availableLanguages={availableLanguages}
         translations={translationMap}
+        briefId={briefData.id || id}
+        helpfulCount={feedbackData.helpfulCount}
+        userFeedback={feedbackData.userFeedback}
+        isSignedIn={feedbackData.isSignedIn}
       />
     </div>
   );

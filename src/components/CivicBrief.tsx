@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import type { CivicContent, VerificationResult } from '@/lib/types';
+import type { CivicContent, FeedbackType, VerificationResult } from '@/lib/types';
 import ConfidenceScore from './ConfidenceScore';
 import SourceLink from './SourceLink';
 import LanguageToggle from './LanguageToggle';
+import FeedbackSection from './FeedbackSection';
 
 interface CivicBriefProps {
   headline: string;
@@ -19,6 +20,11 @@ interface CivicBriefProps {
   translations?: Record<string, { headline: string; content: CivicContent }>;
   onLanguageChange?: (language: string) => void;
   languageLoading?: boolean;
+  briefId?: string;
+  helpfulCount?: number;
+  userFeedback?: FeedbackType;
+  isSignedIn?: boolean;
+  isDemo?: boolean;
 }
 
 interface BriefSectionProps {
@@ -80,6 +86,11 @@ export default function CivicBrief({
   translations,
   onLanguageChange,
   languageLoading,
+  briefId,
+  helpfulCount = 0,
+  userFeedback,
+  isSignedIn = false,
+  isDemo = false,
 }: CivicBriefProps) {
   const [showVerification, setShowVerification] = useState(false);
 
@@ -264,6 +275,17 @@ export default function CivicBrief({
       >
         <SourceLink url={sourceUrl} title={sourceTitle} />
       </div>
+
+      {/* Community Feedback */}
+      {briefId && (
+        <FeedbackSection
+          briefId={briefId}
+          helpfulCount={helpfulCount}
+          userFeedback={userFeedback}
+          isSignedIn={isSignedIn}
+          isDemo={isDemo}
+        />
+      )}
     </div>
   );
 }
