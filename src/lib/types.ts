@@ -108,11 +108,30 @@ export interface BriefTopic {
   assigned_by: 'ai' | 'human';
 }
 
+export type FeedbackType =
+  | 'factual_error'
+  | 'missing_info'
+  | 'misleading'
+  | 'translation_error'
+  | 'outdated'
+  | 'helpful';
+
+export const FEEDBACK_TYPES: readonly FeedbackType[] = [
+  'factual_error',
+  'missing_info',
+  'misleading',
+  'translation_error',
+  'outdated',
+  'helpful',
+] as const;
+
 export interface CommunityFeedback {
   id: string;
   brief_id: string;
-  feedback_type: 'factual_error' | 'missing_info' | 'misleading' | 'translation_error' | 'outdated' | 'helpful';
+  user_id: string;
+  feedback_type: FeedbackType;
   details: string | null;
+  metadata: Record<string, unknown>;
   resolution: string | null;
   resolved_at: string | null;
   created_at: string;
@@ -193,6 +212,17 @@ export interface VerifyRequest {
 export interface VerifyResponse {
   briefId: string;
   verification: VerificationResult;
+}
+
+export interface FeedbackRequest {
+  briefId: string;
+  feedbackType: FeedbackType;
+  details?: string;
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  feedbackType: FeedbackType;
 }
 
 // ─── Pipeline Status (for progress UI) ───
