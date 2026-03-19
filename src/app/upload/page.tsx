@@ -116,7 +116,7 @@ export default function UploadPage() {
   }
 
   const availableLanguages = ['en'];
-  if (result) {
+  if (result?.translations) {
     for (const t of result.translations) {
       if (!availableLanguages.includes(t.language)) {
         availableLanguages.push(t.language);
