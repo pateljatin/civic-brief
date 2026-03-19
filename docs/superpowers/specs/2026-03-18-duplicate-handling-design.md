@@ -219,6 +219,7 @@ The `UploadResult` type in `upload/page.tsx` should use this union. The discrimi
 
 **E2E tests (Playwright):**
 - Upload duplicate: redirect animation appears, civic icons cycle, lands on brief page
+- Upload duplicate on mobile viewport (375x667): animation card renders without overflow, "Go now" tappable
 - Redirect animation accessible (`aria-live` region, screen reader text)
 - "Go now" link works
 - Render guard: no crash if redirect is slow
