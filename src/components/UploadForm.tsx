@@ -1,28 +1,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import type { CivicContent, VerificationResult, PipelineStep } from '@/lib/types';
+import type { PipelineStep, SummarizeResult } from '@/lib/types';
 
-interface UploadResult {
-  sourceId: string | null;
-  briefId: string | null;
-  brief: {
-    headline: string;
-    summary: string;
-    content: CivicContent;
-    confidence_score: number;
-    confidence_level: 'high' | 'medium' | 'low';
-  };
-  verification: VerificationResult;
-  translations: Array<{
-    language: string;
-    briefId: string | null;
-    headline?: string;
-    content?: CivicContent;
-  }>;
-  duplicate?: boolean;
-  message?: string;
-}
+type UploadResult = SummarizeResult;
 
 interface UploadFormProps {
   onResult?: (result: UploadResult) => void;

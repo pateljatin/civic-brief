@@ -77,6 +77,7 @@ export interface Source {
   requires_review: boolean;
   status: 'pending' | 'processing' | 'processed' | 'failed' | 'retracted';
   metadata: Record<string, unknown> | null;
+  duplicate_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -177,21 +178,37 @@ export interface SummarizeRequest {
   documentTypeSlug?: string;
 }
 
-export interface SummarizeResponse {
-  sourceId: string;
-  briefId: string;
-  brief: {
-    headline: string;
-    summary: string;
-    content: CivicContent;
-    confidence_score: number;
-    confidence_level: string;
-  };
-  translations: {
-    language: string;
-    briefId: string;
-  }[];
-}
+export type SummarizeResult =
+  | {
+      duplicate: true;
+      sourceId: string;
+      briefId: string | null;
+      redirectUrl: string;
+      message: string;
+    }
+  | {
+      duplicate?: false;
+      sourceId: string | null;
+      briefId: string | null;
+      brief: {
+        headline: string;
+        summary: string;
+        content: CivicContent;
+        confidence_score: number;
+        confidence_level: 'high' | 'medium' | 'low';
+      };
+      verification?: VerificationResult;
+      translations: {
+        language: string;
+        briefId: string | null;
+        headline?: string;
+        content?: CivicContent;
+      }[];
+      previousVersionId?: string;
+    };
+
+/** @deprecated Use SummarizeResult instead */
+export type SummarizeResponse = SummarizeResult;
 
 export interface TranslateRequest {
   briefId: string;
