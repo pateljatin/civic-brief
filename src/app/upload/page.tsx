@@ -1,31 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase';
 import UploadForm from '@/components/UploadForm';
 import CivicBrief from '@/components/CivicBrief';
-import type { CivicContent, VerificationResult } from '@/lib/types';
+import type { CivicContent, SummarizeResult } from '@/lib/types';
 import type { User } from '@supabase/supabase-js';
 
-interface UploadResult {
-  sourceId: string | null;
-  briefId: string | null;
-  brief: {
-    headline: string;
-    summary: string;
-    content: CivicContent;
-    confidence_score: number;
-    confidence_level: 'high' | 'medium' | 'low';
-  };
-  verification: VerificationResult;
-  translations: Array<{
-    language: string;
-    briefId: string | null;
-    headline?: string;
-    content?: CivicContent;
-  }>;
-  duplicate?: boolean;
-}
+type UploadResult = SummarizeResult;
 
 export default function UploadPage() {
   const [result, setResult] = useState<UploadResult | null>(null);
@@ -37,6 +20,8 @@ export default function UploadPage() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [dailyLimit, setDailyLimit] = useState<number>(10);
   const [user, setUser] = useState<User | null>(null);
+  const [duplicateRedirect, setDuplicateRedirect] = useState<string | null>(null);
+  const router = useRouter();
 
   // Fetch daily limit and auth state on mount
   useEffect(() => {
@@ -60,6 +45,13 @@ export default function UploadPage() {
   }, []);
 
   function handleResult(data: UploadResult) {
+    if (data.duplicate && data.redirectUrl) {
+      setDuplicateRedirect(data.redirectUrl);
+      setTimeout(() => {
+        router.push(data.redirectUrl);
+      }, 2000);
+      return;
+    }
     setResult(data);
     setCurrentLang('en');
     // Decrement local remaining count
@@ -67,13 +59,15 @@ export default function UploadPage() {
       setRemaining(Math.max(0, remaining - 1));
     }
 
-    const cached: Record<string, { headline: string; content: CivicContent }> = {};
-    for (const t of data.translations) {
-      if (t.headline && t.content) {
-        cached[t.language] = { headline: t.headline, content: t.content };
+    if (!data.duplicate && data.translations) {
+      const cached: Record<string, { headline: string; content: CivicContent }> = {};
+      for (const t of data.translations) {
+        if (t.headline && t.content) {
+          cached[t.language] = { headline: t.headline, content: t.content };
+        }
       }
+      setTranslations(cached);
     }
-    setTranslations(cached);
   }
 
   async function handleLanguageChange(lang: string) {
@@ -116,13 +110,23 @@ export default function UploadPage() {
   }
 
   const availableLanguages = ['en'];
-  if (result?.translations) {
+  if (result && !result.duplicate && result.translations) {
     for (const t of result.translations) {
       if (!availableLanguages.includes(t.language)) {
         availableLanguages.push(t.language);
       }
     }
   }
+
+  // Trigger progress bar fill animation
+  useEffect(() => {
+    if (duplicateRedirect) {
+      requestAnimationFrame(() => {
+        const el = document.querySelector('.dup-progress-fill') as HTMLElement;
+        if (el) el.style.width = '100%';
+      });
+    }
+  }, [duplicateRedirect]);
 
   const limitReached = remaining !== null && remaining <= 0;
 
@@ -217,7 +221,90 @@ export default function UploadPage() {
         <UploadForm onResult={handleResult} />
       )}
 
-      {result && (
+      {duplicateRedirect && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            textAlign: 'center',
+            padding: '0 16px',
+          }}
+          aria-live="polite"
+          role="status"
+        >
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            border: '1px solid var(--border, #e2ddd4)',
+            padding: '48px 40px',
+            maxWidth: '480px',
+            width: '100%',
+          }}>
+            {/* Cycling civic icons */}
+            <div style={{ fontSize: '48px', marginBottom: '20px', height: '56px' }}>
+              <CivicIconCycle />
+            </div>
+
+            <h2 style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: '22px',
+              fontWeight: 700,
+              marginBottom: '12px',
+            }}>
+              This document already has a brief.
+            </h2>
+
+            {/* Progress bar */}
+            <div style={{
+              width: '100%',
+              height: '4px',
+              background: 'var(--border, #e2ddd4)',
+              borderRadius: '2px',
+              overflow: 'hidden',
+              marginBottom: '16px',
+            }}>
+              <div className="dup-progress-fill" style={{
+                height: '100%',
+                background: 'var(--civic, #1e3a5f)',
+                borderRadius: '2px',
+                width: '0%',
+                transition: 'width 2s linear',
+              }} />
+            </div>
+
+            <p style={{
+              fontSize: '14px',
+              color: 'var(--muted, #8a8a92)',
+              marginBottom: '16px',
+            }}>
+              Taking you there...
+            </p>
+
+            <a
+              href={duplicateRedirect}
+              onClick={(e) => { e.preventDefault(); router.push(duplicateRedirect); }}
+              style={{
+                color: 'var(--accent, #b44d12)',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Go now
+            </a>
+          </div>
+
+          {/* Screen reader text */}
+          <span className="sr-only">
+            Redirecting to existing brief for this document.
+          </span>
+        </div>
+      )}
+
+      {result && !result.duplicate && result.brief && (
         <div style={{ marginTop: '48px' }}>
           <h2
             style={{
@@ -263,6 +350,49 @@ export default function UploadPage() {
           )}
         </div>
       )}
+
+      <style>{`
+        @keyframes civicPulse {
+          0% { transform: scale(0.9); opacity: 0.5; }
+          50% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(1.0); opacity: 1; }
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+      `}</style>
     </div>
+  );
+}
+
+function CivicIconCycle() {
+  const [index, setIndex] = useState(0);
+  const icons = ['\u2696\uFE0F', '\uD83C\uDFDB\uFE0F', '\uD83D\uDCDC', '\uD83D\uDD28', '\uD83D\uDCC4'];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % icons.length);
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      key={index}
+      style={{
+        display: 'inline-block',
+        animation: 'civicPulse 0.4s ease-in-out',
+      }}
+    >
+      {icons[index]}
+    </span>
   );
 }
