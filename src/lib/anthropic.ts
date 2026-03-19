@@ -37,6 +37,11 @@ export async function generateJSON<T>(
     throw new Error('No text response from Claude');
   }
 
+  // Check if response was truncated
+  if (response.stop_reason === 'max_tokens') {
+    console.error('Claude response truncated (max_tokens). Consider increasing maxTokens.');
+  }
+
   // Extract JSON from the response (handle markdown code fences)
   let jsonText = textBlock.text.trim();
   const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -44,5 +49,15 @@ export async function generateJSON<T>(
     jsonText = fenceMatch[1].trim();
   }
 
-  return JSON.parse(jsonText) as T;
+  try {
+    return JSON.parse(jsonText) as T;
+  } catch (parseError) {
+    console.error('JSON parse failed. Raw response (first 500 chars):', jsonText.slice(0, 500));
+    console.error('Response length:', jsonText.length, 'stop_reason:', response.stop_reason);
+    throw new Error(
+      response.stop_reason === 'max_tokens'
+        ? 'AI response was too long and got cut off. Try a shorter document.'
+        : 'Failed to parse AI response. Please try again.'
+    );
+  }
 }

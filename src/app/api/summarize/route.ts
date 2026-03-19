@@ -133,18 +133,23 @@ export async function POST(request: NextRequest) {
 
     if (db) {
       // 3a. Check content hash (exact duplicate)
-      const { data: hashMatch } = await db
+      const { data: hashMatch, error: hashError } = await db
         .from('sources')
         .select('id, source_url, metadata, duplicate_count')
         .eq('content_hash', contentHash)
         .maybeSingle();
 
+      if (hashError) {
+        console.error('Hash lookup error:', hashError);
+      }
+
       if (hashMatch) {
         // Increment duplicate count
-        await db
-          .from('sources')
-          .update({ duplicate_count: (hashMatch.duplicate_count || 0) + 1 })
-          .eq('id', hashMatch.id);
+        Promise.resolve(
+          db.from('sources')
+            .update({ duplicate_count: ((hashMatch as Record<string, unknown>).duplicate_count as number || 0) + 1 })
+            .eq('id', hashMatch.id)
+        ).catch((err: unknown) => console.error('Failed to increment duplicate_count:', err));
 
         // Store alternate URL if different
         const normalizedUpload = normalizeUrl(sourceUrl);
