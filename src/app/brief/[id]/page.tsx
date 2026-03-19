@@ -28,8 +28,7 @@ const MOCK_BRIEF = {
     ],
     document_type: 'budget',
   } satisfies CivicContent,
-  sourceUrl: '#',
-  sourceTitle: 'Demo source (not a real document)',
+  sourceUrl: 'https://example.gov/budget/fy2026-proposed.pdf',
   confidenceScore: 0.92,
   confidenceLevel: 'high' as const,
 };

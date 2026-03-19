@@ -112,8 +112,32 @@ export default function CivicBrief({
         border: '1px solid var(--border, #e2ddd4)',
         overflow: 'hidden',
         maxWidth: '640px',
+        position: 'relative',
       }}
     >
+      {/* Demo watermark */}
+      {isDemo && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-30deg)',
+            fontSize: '64px',
+            fontWeight: 800,
+            fontFamily: "'Fraunces', serif",
+            color: 'rgba(0, 0, 0, 0.04)',
+            letterSpacing: '8px',
+            textTransform: 'uppercase',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            zIndex: 1,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          DEMO
+        </div>
+      )}
       {/* Header */}
       <div style={{ padding: '24px 24px 0' }}>
         <div
@@ -273,7 +297,7 @@ export default function CivicBrief({
           alignItems: 'center',
         }}
       >
-        <SourceLink url={sourceUrl} title={sourceTitle} />
+        <SourceLink url={sourceUrl} title={sourceTitle} isDemo={isDemo} />
       </div>
 
       {/* Community Feedback */}
