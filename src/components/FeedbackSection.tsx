@@ -27,10 +27,10 @@ interface CategoryOption {
   icon: string;
 }
 
-const PRIMARY_CATEGORIES: CategoryOption[] = [
-  { type: 'factual_error', label: 'Factual error', icon: '\u2717' },
-  { type: 'missing_info', label: 'Missing info', icon: '\u2026' },
-  { type: 'translation_error', label: 'Translation error', icon: '\uD83C\uDF10' },
+const PRIMARY_CATEGORIES: (CategoryOption & { color: string })[] = [
+  { type: 'factual_error', label: 'Factual error', icon: '\u2717', color: '#dc2626' },
+  { type: 'missing_info', label: 'Missing info', icon: '\u2026', color: '#d97706' },
+  { type: 'translation_error', label: 'Translation error', icon: '\uD83C\uDF10', color: '#7c3aed' },
 ];
 
 const SECONDARY_CATEGORIES: CategoryOption[] = [
@@ -311,10 +311,10 @@ export default function FeedbackSection({
                 style={{
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: 'var(--ink, #1a1a1a)',
+                  color: 'var(--civic, #1e3a5f)',
                 }}
               >
-                What&apos;s the issue?
+                Report an error
               </div>
               <button
                 onClick={() => setState('default')}
@@ -350,13 +350,16 @@ export default function FeedbackSection({
                       : 'white',
                   }}
                 >
-                  <span aria-hidden="true" style={{ fontSize: '14px' }}>{cat.icon}</span>
+                  <span aria-hidden="true" style={{ fontSize: '14px', color: cat.color }}>{cat.icon}</span>
                   {cat.label}
                 </button>
               ))}
             </div>
 
             {/* Secondary categories (de-emphasized) */}
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--muted, #8a8a92)', marginBottom: '8px' }}>
+              Other concerns
+            </div>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
               {SECONDARY_CATEGORIES.map((cat) => (
                 <button
@@ -365,7 +368,7 @@ export default function FeedbackSection({
                   style={{
                     ...categoryButtonStyle,
                     fontSize: '12px',
-                    padding: '6px 10px',
+                    padding: '12px 10px',
                     color: 'var(--muted, #8a8a92)',
                     border: selectedCategory === cat.type
                       ? '2px solid var(--civic, #1e3a5f)'
@@ -386,6 +389,7 @@ export default function FeedbackSection({
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="Optional: tell us more..."
+              maxLength={1000}
               rows={3}
               style={{
                 width: '100%',
@@ -459,7 +463,7 @@ const buttonBase: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: '6px',
-  padding: '6px 14px',
+  padding: '12px 14px',
   borderRadius: '8px',
   border: '1px solid var(--border, #e2ddd4)',
   background: 'white',
@@ -475,7 +479,7 @@ const categoryButtonStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '8px 12px',
+  padding: '12px',
   borderRadius: '8px',
   fontSize: '13px',
   fontWeight: 500,

@@ -170,7 +170,8 @@ export default async function BriefPage({ params }: PageProps) {
           confidenceScore={MOCK_BRIEF.confidenceScore}
           confidenceLevel={MOCK_BRIEF.confidenceLevel}
           currentLanguage="en"
-          availableLanguages={['en', 'es']}
+          availableLanguages={['en', 'es', 'hi']}
+          translations={{}}
           briefId="demo"
           helpfulCount={0}
           isSignedIn={false}

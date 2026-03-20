@@ -151,11 +151,11 @@ export default function CivicBrief({
           }}
         >
           <ConfidenceScore score={confidenceScore} level={confidenceLevel} />
-          {availableLanguages.length > 1 && onLanguageChange && (
+          {availableLanguages.length > 1 && (onLanguageChange || translations) && (
             <LanguageToggle
               current={currentLanguage}
               available={availableLanguages}
-              onChange={onLanguageChange}
+              onChange={onLanguageChange || (() => {})}
               loading={languageLoading}
             />
           )}
