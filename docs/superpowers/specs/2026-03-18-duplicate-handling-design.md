@@ -14,6 +14,7 @@ Define how Civic Brief handles duplicate and updated documents across all user t
 | Both new | Full pipeline | Standard processing. |
 | Duplicate count | Increment `duplicate_count` on source | Community interest signal. UI surfacing is #33 (v1.2). |
 | Redirect UX | 2-second animated transition | Civic-themed icon cycle + progress bar. Not a generic spinner. |
+| i18n | ALL text in the brief card must translate | Every static label, button, badge, and tooltip inside CivicBrief must use `ui-strings.ts` and respond to the active language. No hardcoded English inside the card boundary. |
 | Redirect method | `router.push()` from `next/navigation` | Smoother than `window.location.href`. No popup blocker issues, no full page reload. |
 | Concurrent uploads | Catch unique constraint violation, fall back to duplicate path | TOCTOU race condition handled via Postgres `23505` error code. |
 | DB client for writes | Service role (bypasses RLS) | Consistent with existing summarize route pattern. `duplicate_count` increment uses service role. |

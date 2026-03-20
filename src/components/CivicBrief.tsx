@@ -200,7 +200,7 @@ export default function CivicBrief({
             gap: '12px',
           }}
         >
-          <ConfidenceScore score={confidenceScore} level={confidenceLevel} />
+          <ConfidenceScore score={confidenceScore} level={confidenceLevel} lang={activeLang} />
           {displayLanguages.length > 1 && (
             <LanguageToggle
               current={activeLang}

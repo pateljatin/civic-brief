@@ -17,6 +17,9 @@ export interface UIStrings {
   reportIssue: string;
   showVerification: string;
   hideVerification: string;
+  highConfidence: string;
+  mediumConfidence: string;
+  lowConfidence: string;
 }
 
 const strings: Record<string, UIStrings> = {
@@ -33,6 +36,9 @@ const strings: Record<string, UIStrings> = {
     reportIssue: 'Report issue',
     showVerification: 'Show verification details',
     hideVerification: 'Hide verification details',
+    highConfidence: 'High confidence',
+    mediumConfidence: 'Medium confidence',
+    lowConfidence: 'Low confidence',
   },
   es: {
     whatChanged: 'Que cambio',
@@ -47,6 +53,9 @@ const strings: Record<string, UIStrings> = {
     reportIssue: 'Reportar problema',
     showVerification: 'Mostrar detalles de verificacion',
     hideVerification: 'Ocultar detalles de verificacion',
+    highConfidence: 'Alta confianza',
+    mediumConfidence: 'Confianza media',
+    lowConfidence: 'Baja confianza',
   },
   hi: {
     whatChanged: 'Kya badla',
@@ -61,6 +70,9 @@ const strings: Record<string, UIStrings> = {
     reportIssue: 'Samasya ki report karen',
     showVerification: 'Satyapan vivaran dikhaye',
     hideVerification: 'Satyapan vivaran chhupaye',
+    highConfidence: 'Ucch vishvas',
+    mediumConfidence: 'Madhyam vishvas',
+    lowConfidence: 'Kam vishvas',
   },
 };
 

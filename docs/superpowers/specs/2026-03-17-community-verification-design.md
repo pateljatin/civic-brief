@@ -15,6 +15,7 @@ Add a community feedback layer to civic briefs. Users can mark briefs as "helpfu
 | Re-translation trigger | `translation_error` >= 2 flags | Triggers re-translation with feedback context. Full community translation review pipeline is #28 (v2.0). |
 | Other feedback types | Logged only | `misleading`, `outdated`, `helpful` are stored for metrics. No automated action. |
 | UI placement | Bottom of brief card | Inline expand on desktop. Bottom sheet on mobile (<640px). |
+| i18n | ALL text in the brief card must translate | Every static label, button, badge, and tooltip inside CivicBrief must use `ui-strings.ts` and respond to the active language. No hardcoded English inside the card boundary. |
 | Admin triage | Supabase dashboard | No custom admin UI in v1.1. Admin guide document for manual triage. |
 | Naming | Keep `community_feedback` | Name becomes accurate as product grows toward community reviewer model. |
 | Tracking | `metadata jsonb` column | Product context only (platform, language viewed, brief version). No PII, no device fingerprinting. Vercel Analytics handles traffic patterns. |
