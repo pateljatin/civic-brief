@@ -1,10 +1,15 @@
+import { getUIStrings } from '@/lib/ui-strings';
+
 interface SourceLinkProps {
   url: string;
   title?: string;
   isDemo?: boolean;
+  lang?: string;
 }
 
-export default function SourceLink({ url, title, isDemo = false }: SourceLinkProps) {
+export default function SourceLink({ url, title, isDemo = false, lang = 'en' }: SourceLinkProps) {
+  const ui = getUIStrings(lang);
+
   // Extract a readable domain from the URL
   let domain = '';
   try {
@@ -13,7 +18,7 @@ export default function SourceLink({ url, title, isDemo = false }: SourceLinkPro
     domain = url;
   }
 
-  const label = title ? `Verify: ${title}` : `Verify at ${domain}`;
+  const label = title ? `${ui.verify}: ${title}` : `${ui.verifyAt} ${domain}`;
 
   const baseStyle = {
     display: 'inline-flex' as const,

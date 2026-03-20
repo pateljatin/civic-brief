@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { FeedbackType } from '@/lib/types';
+import { getUIStrings } from '@/lib/ui-strings';
 
 interface FeedbackSectionProps {
   briefId: string;
@@ -9,6 +10,7 @@ interface FeedbackSectionProps {
   userFeedback?: FeedbackType;
   isSignedIn: boolean;
   isDemo?: boolean;
+  lang?: string;
 }
 
 type FeedbackState =
@@ -46,7 +48,9 @@ export default function FeedbackSection({
   userFeedback,
   isSignedIn,
   isDemo = false,
+  lang = 'en',
 }: FeedbackSectionProps) {
+  const ui = getUIStrings(lang);
   const [state, setState] = useState<FeedbackState>(() => {
     if (isDemo) return 'demo-preview';
     if (userFeedback) return 'already-submitted';
@@ -168,7 +172,7 @@ export default function FeedbackSection({
             }}
           >
             <span aria-hidden="true" style={{ fontSize: '14px' }}>{'\uD83D\uDC4D'}</span>
-            Helpful ({helpfulCount})
+            {ui.helpful} ({helpfulCount})
           </button>
           <button
             disabled
@@ -179,7 +183,7 @@ export default function FeedbackSection({
               cursor: 'not-allowed',
             }}
           >
-            Report issue
+            {ui.reportIssue}
           </button>
         </div>
       </div>
@@ -441,7 +445,7 @@ export default function FeedbackSection({
           style={buttonBase}
         >
           <span aria-hidden="true" style={{ fontSize: '14px' }}>{'\uD83D\uDC4D'}</span>
-          Helpful ({helpfulCount})
+          {ui.helpful} ({helpfulCount})
         </button>
         <button
           onClick={handleReportIssue}
@@ -450,7 +454,7 @@ export default function FeedbackSection({
             color: 'var(--muted, #8a8a92)',
           }}
         >
-          Report issue
+          {ui.reportIssue}
         </button>
       </div>
     </div>

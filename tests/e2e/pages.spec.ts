@@ -126,6 +126,45 @@ test.describe('Brief demo page', () => {
   });
 });
 
+test.describe('Language switching', () => {
+  test('demo brief switches to Spanish labels and content', async ({ page }) => {
+    await page.goto('/brief/demo');
+
+    // English labels visible initially
+    await expect(page.getByText('What changed')).toBeVisible();
+    await expect(page.getByText('Who is affected')).toBeVisible();
+
+    // Click Espanol pill
+    await page.getByRole('button', { name: 'Espanol' }).click();
+
+    // Section labels should be in Spanish
+    await expect(page.getByText('Que cambio')).toBeVisible();
+    await expect(page.getByText('Quien se ve afectado')).toBeVisible();
+    await expect(page.getByText('Que puedes hacer')).toBeVisible();
+    await expect(page.getByText('A donde va el dinero')).toBeVisible();
+    await expect(page.getByText('Fechas importantes')).toBeVisible();
+
+    // Content should be Spanish (use heading to avoid strict mode on multiple matches)
+    await expect(page.getByRole('heading', { name: /impuesto a la propiedad/ })).toBeVisible();
+
+    // Feedback button should be translated
+    await expect(page.getByRole('button', { name: /til/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Reportar/i })).toBeVisible();
+  });
+
+  test('demo brief switches back to English', async ({ page }) => {
+    await page.goto('/brief/demo');
+
+    // Switch to Spanish then back to English
+    await page.getByRole('button', { name: 'Espanol' }).click();
+    await expect(page.getByText('Que cambio')).toBeVisible();
+
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('What changed')).toBeVisible();
+    await expect(page.getByText('Who is affected')).toBeVisible();
+  });
+});
+
 test.describe('Landing redirect', () => {
   test('/landing redirects to /', async ({ page }) => {
     await page.goto('/landing');
