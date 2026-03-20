@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import type { CivicContent, VerificationResult } from '@/lib/types';
+import type { CivicContent, FeedbackType, VerificationResult } from '@/lib/types';
+import { getUIStrings } from '@/lib/ui-strings';
 import ConfidenceScore from './ConfidenceScore';
 import SourceLink from './SourceLink';
 import LanguageToggle from './LanguageToggle';
+import FeedbackSection from './FeedbackSection';
 
 interface CivicBriefProps {
   headline: string;
@@ -19,6 +21,11 @@ interface CivicBriefProps {
   translations?: Record<string, { headline: string; content: CivicContent }>;
   onLanguageChange?: (language: string) => void;
   languageLoading?: boolean;
+  briefId?: string;
+  helpfulCount?: number;
+  userFeedback?: FeedbackType;
+  isSignedIn?: boolean;
+  isDemo?: boolean;
 }
 
 interface BriefSectionProps {
@@ -77,21 +84,75 @@ export default function CivicBrief({
   verification,
   currentLanguage,
   availableLanguages,
-  translations,
+  translations: initialTranslations,
   onLanguageChange,
-  languageLoading,
+  languageLoading: externalLoading,
+  briefId,
+  helpfulCount = 0,
+  userFeedback,
+  isSignedIn = false,
+  isDemo = false,
 }: CivicBriefProps) {
   const [showVerification, setShowVerification] = useState(false);
+  const [activeLang, setActiveLang] = useState(currentLanguage);
+  const [translations, setTranslations] = useState(initialTranslations || {});
+  const [translating, setTranslating] = useState(false);
+
+  // All supported languages for non-demo briefs
+  const displayLanguages = isDemo
+    ? availableLanguages
+    : ['en', 'es', 'hi'];
+
+  const handleLanguageChange = async (lang: string) => {
+    if (onLanguageChange) {
+      onLanguageChange(lang);
+      return;
+    }
+
+    // Already have this translation cached
+    if (lang === currentLanguage || translations[lang]) {
+      setActiveLang(lang);
+      return;
+    }
+
+    // Fetch translation on-the-fly
+    if (!briefId || isDemo) return;
+    setTranslating(true);
+    setActiveLang(lang);
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ briefId, targetLanguage: lang }),
+      });
+
+      if (!res.ok) throw new Error('Translation failed');
+
+      const data = await res.json();
+      setTranslations((prev) => ({
+        ...prev,
+        [lang]: { headline: data.headline, content: data.content },
+      }));
+    } catch {
+      // Revert to previous language on failure
+      setActiveLang(currentLanguage);
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   // Use translated content if available
   const activeContent =
-    currentLanguage !== 'en' && translations?.[currentLanguage]
-      ? translations[currentLanguage].content
+    activeLang !== currentLanguage && translations[activeLang]
+      ? translations[activeLang].content
       : content;
   const activeHeadline =
-    currentLanguage !== 'en' && translations?.[currentLanguage]
-      ? translations[currentLanguage].headline
+    activeLang !== currentLanguage && translations[activeLang]
+      ? translations[activeLang].headline
       : headline;
+
+  const ui = getUIStrings(activeLang);
 
   return (
     <div
@@ -101,8 +162,32 @@ export default function CivicBrief({
         border: '1px solid var(--border, #e2ddd4)',
         overflow: 'hidden',
         maxWidth: '640px',
+        position: 'relative',
       }}
     >
+      {/* Demo watermark */}
+      {isDemo && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-30deg)',
+            fontSize: '64px',
+            fontWeight: 800,
+            fontFamily: "'Fraunces', serif",
+            color: 'rgba(0, 0, 0, 0.04)',
+            letterSpacing: '8px',
+            textTransform: 'uppercase',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            zIndex: 1,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          DEMO
+        </div>
+      )}
       {/* Header */}
       <div style={{ padding: '24px 24px 0' }}>
         <div
@@ -115,13 +200,13 @@ export default function CivicBrief({
             gap: '12px',
           }}
         >
-          <ConfidenceScore score={confidenceScore} level={confidenceLevel} />
-          {availableLanguages.length > 1 && onLanguageChange && (
+          <ConfidenceScore score={confidenceScore} level={confidenceLevel} lang={activeLang} />
+          {displayLanguages.length > 1 && (
             <LanguageToggle
-              current={currentLanguage}
-              available={availableLanguages}
-              onChange={onLanguageChange}
-              loading={languageLoading}
+              current={activeLang}
+              available={displayLanguages}
+              onChange={handleLanguageChange}
+              loading={translating || externalLoading}
             />
           )}
         </div>
@@ -140,26 +225,26 @@ export default function CivicBrief({
 
       {/* Sections */}
       <div style={{ padding: '0 24px' }}>
-        <BriefSection icon="&#916;" iconBg="#fef3e2" iconColor="var(--accent, #b44d12)" label="What changed">
+        <BriefSection icon="&#916;" iconBg="#fef3e2" iconColor="var(--accent, #b44d12)" label={ui.whatChanged}>
           {activeContent.what_changed}
         </BriefSection>
 
-        <BriefSection icon="&#128100;" iconBg="var(--civic-light, #e8eef5)" iconColor="var(--civic, #1e3a5f)" label="Who is affected">
+        <BriefSection icon="&#128100;" iconBg="var(--civic-light, #e8eef5)" iconColor="var(--civic, #1e3a5f)" label={ui.whoAffected}>
           {activeContent.who_affected}
         </BriefSection>
 
-        <BriefSection icon="&#10003;" iconBg="var(--green-light, #e9f5ec)" iconColor="var(--green, #2d6a4f)" label="What you can do">
+        <BriefSection icon="&#10003;" iconBg="var(--green-light, #e9f5ec)" iconColor="var(--green, #2d6a4f)" label={ui.whatYouCanDo}>
           {activeContent.what_to_do}
         </BriefSection>
 
         {activeContent.money && (
-          <BriefSection icon="$" iconBg="#fef3e2" iconColor="var(--accent, #b44d12)" label="Where the money goes">
+          <BriefSection icon="$" iconBg="#fef3e2" iconColor="var(--accent, #b44d12)" label={ui.whereMoneyGoes}>
             {activeContent.money}
           </BriefSection>
         )}
 
         {activeContent.deadlines && activeContent.deadlines.length > 0 && (
-          <BriefSection icon="&#128197;" iconBg="var(--civic-light, #e8eef5)" iconColor="var(--civic, #1e3a5f)" label="Key deadlines">
+          <BriefSection icon="&#128197;" iconBg="var(--civic-light, #e8eef5)" iconColor="var(--civic, #1e3a5f)" label={ui.keyDeadlines}>
             <ul style={{ margin: 0, paddingLeft: '16px' }}>
               {activeContent.deadlines.map((d, i) => (
                 <li key={i}>{d}</li>
@@ -169,7 +254,7 @@ export default function CivicBrief({
         )}
 
         {activeContent.context && (
-          <BriefSection icon="&#128218;" iconBg="#f3e8ff" iconColor="#7c3aed" label="Context">
+          <BriefSection icon="&#128218;" iconBg="#f3e8ff" iconColor="#7c3aed" label={ui.context}>
             {activeContent.context}
           </BriefSection>
         )}
@@ -212,7 +297,7 @@ export default function CivicBrief({
               fontFamily: 'inherit',
             }}
           >
-            {showVerification ? 'Hide' : 'Show'} verification details
+            {showVerification ? ui.hideVerification : ui.showVerification}
           </button>
           {showVerification && (
             <div
@@ -262,8 +347,20 @@ export default function CivicBrief({
           alignItems: 'center',
         }}
       >
-        <SourceLink url={sourceUrl} title={sourceTitle} />
+        <SourceLink url={sourceUrl} title={sourceTitle} isDemo={isDemo} lang={activeLang} />
       </div>
+
+      {/* Community Feedback */}
+      {briefId && (
+        <FeedbackSection
+          briefId={briefId}
+          helpfulCount={helpfulCount}
+          userFeedback={userFeedback}
+          isSignedIn={isSignedIn}
+          isDemo={isDemo}
+          lang={activeLang}
+        />
+      )}
     </div>
   );
 }

@@ -228,6 +228,24 @@ When NOT to use Superpowers (provide reasoning if skipping):
 - Pure research or exploration tasks
 - Documentation-only changes with no code impact
 
+### Spec Writing Rules (learned from C8 retro)
+These rules apply to every design spec and implementation plan:
+- **Render tree audit**: After drafting "Files Changed," walk the render tree of every affected page. Any component that renders user-visible text is in scope.
+- **State machine tables**: Conditional rendering flows get a `(state, condition) -> rendered output` table. Never describe rendering logic in prose only.
+- **Five states per component**: Every UI component spec must define: default, loading, empty, error, and demo states. If a state is "not applicable," say so explicitly.
+- **NOT in scope section**: Every spec must have an explicit exclusions list to prevent scope drift.
+- **TypeScript types for API responses**: Specs must include the actual TypeScript type, not just prose. Use discriminated unions for multi-shape responses.
+- **i18n requirements must be specific**: List (a) every string to translate, (b) where translations live, (c) which components need a `lang` prop. "Must translate" without this detail is incomplete.
+- **Concurrent request scenarios**: Any write-path spec must describe what happens with two simultaneous identical requests.
+- **Deploy environment checklist**: Specs involving OAuth or external APIs must list all origins (production, staging, localhost) and required configuration per environment.
+- **Planning retrospective**: After merging, write a retro in `docs/superpowers/retros/` documenting planned vs actual, categorizing every unplanned addition, and extracting rules. See `2026-03-20-c8-community-verification.md` for the template.
+
+### Supabase Patterns (include in every spec touching DB)
+- `.insert()` / `.update()` return `PromiseLike`, not `Promise`. Wrap in `Promise.resolve()` or use fire-and-forget.
+- Use `.maybeSingle()` when a result may not exist. `.single()` throws on 0 or 2+ rows.
+- Service role for all API route writes. RLS is defense-in-depth.
+- URL storage requires normalization rules (case, trailing slash, www prefix).
+
 ### Git Practices
 - Meaningful commit messages. Not "update" or "fix".
 - Main branch is always deployable.

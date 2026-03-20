@@ -5,6 +5,7 @@ import {
   sanitizeText,
   isValidUUID,
   isValidLanguageCode,
+  rateLimitByUser,
 } from '@/lib/security';
 
 describe('security', () => {
@@ -132,6 +133,33 @@ describe('security', () => {
 
     it('rejects null file', () => {
       expect(validateFile(null as unknown as File).valid).toBe(false);
+    });
+  });
+
+  describe('rateLimitByUser', () => {
+    it('allows requests under the limit', () => {
+      const result = rateLimitByUser('user-1', 5, 60000);
+      expect(result).toBeNull();
+    });
+
+    it('blocks requests over the limit', () => {
+      const userId = 'user-rate-test-' + Date.now();
+      for (let i = 0; i < 5; i++) {
+        rateLimitByUser(userId, 5, 60000);
+      }
+      const result = rateLimitByUser(userId, 5, 60000);
+      expect(result).not.toBeNull();
+      expect(result?.status).toBe(429);
+    });
+
+    it('tracks different users independently', () => {
+      const userA = 'user-a-' + Date.now();
+      const userB = 'user-b-' + Date.now();
+      for (let i = 0; i < 5; i++) {
+        rateLimitByUser(userA, 5, 60000);
+      }
+      expect(rateLimitByUser(userA, 5, 60000)).not.toBeNull();
+      expect(rateLimitByUser(userB, 5, 60000)).toBeNull();
     });
   });
 });

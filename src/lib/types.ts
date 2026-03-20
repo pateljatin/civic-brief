@@ -77,6 +77,7 @@ export interface Source {
   requires_review: boolean;
   status: 'pending' | 'processing' | 'processed' | 'failed' | 'retracted';
   metadata: Record<string, unknown> | null;
+  duplicate_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -108,11 +109,30 @@ export interface BriefTopic {
   assigned_by: 'ai' | 'human';
 }
 
+export type FeedbackType =
+  | 'factual_error'
+  | 'missing_info'
+  | 'misleading'
+  | 'translation_error'
+  | 'outdated'
+  | 'helpful';
+
+export const FEEDBACK_TYPES: readonly FeedbackType[] = [
+  'factual_error',
+  'missing_info',
+  'misleading',
+  'translation_error',
+  'outdated',
+  'helpful',
+] as const;
+
 export interface CommunityFeedback {
   id: string;
   brief_id: string;
-  feedback_type: 'factual_error' | 'missing_info' | 'misleading' | 'translation_error' | 'outdated' | 'helpful';
+  user_id: string;
+  feedback_type: FeedbackType;
   details: string | null;
+  metadata: Record<string, unknown>;
   resolution: string | null;
   resolved_at: string | null;
   created_at: string;
@@ -158,21 +178,37 @@ export interface SummarizeRequest {
   documentTypeSlug?: string;
 }
 
-export interface SummarizeResponse {
-  sourceId: string;
-  briefId: string;
-  brief: {
-    headline: string;
-    summary: string;
-    content: CivicContent;
-    confidence_score: number;
-    confidence_level: string;
-  };
-  translations: {
-    language: string;
-    briefId: string;
-  }[];
-}
+export type SummarizeResult =
+  | {
+      duplicate: true;
+      sourceId: string;
+      briefId: string | null;
+      redirectUrl: string;
+      message: string;
+    }
+  | {
+      duplicate?: false;
+      sourceId: string | null;
+      briefId: string | null;
+      brief: {
+        headline: string;
+        summary: string;
+        content: CivicContent;
+        confidence_score: number;
+        confidence_level: 'high' | 'medium' | 'low';
+      };
+      verification?: VerificationResult;
+      translations: {
+        language: string;
+        briefId: string | null;
+        headline?: string;
+        content?: CivicContent;
+      }[];
+      previousVersionId?: string;
+    };
+
+/** @deprecated Use SummarizeResult instead */
+export type SummarizeResponse = SummarizeResult;
 
 export interface TranslateRequest {
   briefId: string;
@@ -193,6 +229,17 @@ export interface VerifyRequest {
 export interface VerifyResponse {
   briefId: string;
   verification: VerificationResult;
+}
+
+export interface FeedbackRequest {
+  briefId: string;
+  feedbackType: FeedbackType;
+  details?: string;
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  feedbackType: FeedbackType;
 }
 
 // ─── Pipeline Status (for progress UI) ───

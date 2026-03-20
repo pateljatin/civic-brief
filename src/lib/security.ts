@@ -52,6 +52,52 @@ if (typeof setInterval !== 'undefined') {
   }, 5 * 60 * 1000);
 }
 
+// ── Per-User Rate Limiting ──
+// Keyed on user ID instead of IP. For authenticated endpoints.
+
+const userRateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+export function rateLimitByUser(
+  userId: string,
+  maxRequests = 5,
+  windowMs = 60 * 1000
+): NextResponse | null {
+  const now = Date.now();
+  const entry = userRateLimitStore.get(userId);
+
+  if (!entry || now > entry.resetAt) {
+    userRateLimitStore.set(userId, { count: 1, resetAt: now + windowMs });
+    return null;
+  }
+
+  if (entry.count >= maxRequests) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait before submitting more feedback.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((entry.resetAt - now) / 1000)),
+        },
+      }
+    );
+  }
+
+  entry.count++;
+  return null;
+}
+
+// Clean up stale user rate limit entries
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    userRateLimitStore.forEach((entry, key) => {
+      if (now > entry.resetAt) {
+        userRateLimitStore.delete(key);
+      }
+    });
+  }, 5 * 60 * 1000);
+}
+
 // ── Input Validation ──
 
 /** Validate a URL is well-formed and uses http(s). Rejects javascript: and data: URIs. */

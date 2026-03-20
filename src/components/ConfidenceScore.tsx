@@ -1,28 +1,32 @@
 'use client';
 
+import { getUIStrings } from '@/lib/ui-strings';
+
 interface ConfidenceScoreProps {
   score: number;
   level: 'high' | 'medium' | 'low';
+  lang?: string;
 }
 
-export default function ConfidenceScore({ score, level }: ConfidenceScoreProps) {
+export default function ConfidenceScore({ score, level, lang = 'en' }: ConfidenceScoreProps) {
+  const ui = getUIStrings(lang);
   const percentage = Math.round(score * 100);
 
   const config = {
     high: {
       bg: 'var(--green-light, #e9f5ec)',
       color: 'var(--green, #2d6a4f)',
-      label: 'High confidence',
+      label: ui.highConfidence,
     },
     medium: {
       bg: '#fef3e2',
       color: 'var(--accent, #b44d12)',
-      label: 'Medium confidence',
+      label: ui.mediumConfidence,
     },
     low: {
       bg: '#fee2e2',
       color: '#dc2626',
-      label: 'Low confidence',
+      label: ui.lowConfidence,
     },
   }[level];
 

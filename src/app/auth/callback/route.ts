@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 /** Hosts we trust for post-login redirects. */
 const ALLOWED_HOSTS = new Set([
   'civic-brief.vercel.app',
+  'civic-brief-staging.vercel.app',
   'localhost:3000',
 ]);
 
