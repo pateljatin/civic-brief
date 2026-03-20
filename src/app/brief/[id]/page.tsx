@@ -33,6 +33,35 @@ const MOCK_BRIEF = {
   confidenceLevel: 'high' as const,
 };
 
+const MOCK_TRANSLATIONS: Record<string, { headline: string; content: CivicContent }> = {
+  es: {
+    headline: 'Aumento del impuesto a la propiedad del 8.2% para el AF2026-27',
+    content: {
+      title: 'Aumento del impuesto a la propiedad del 8.2% para el AF2026-27',
+      what_changed:
+        'El presupuesto propuesto aumenta la tasa del impuesto a la propiedad de 1.12 a 1.21 por cada $100 de valor tasado, un aumento del 8.2% sobre el AF2025-26. Este es el primer aumento de tasa en tres anos.',
+      who_affected:
+        'Todos los propietarios de inmuebles residenciales y comerciales dentro de los limites de la ciudad. Una vivienda tasada en $300,000 pagaria aproximadamente $270 mas por ano.',
+      what_to_do:
+        'El periodo de comentarios publicos esta abierto hasta el 12 de abril. La audiencia del presupuesto es el 18 de abril a las 7pm en el Ayuntamiento. Los comentarios escritos pueden enviarse a budget@cityname.gov.',
+      money:
+        '$4.1 millones de aumento asignados a reparacion de carreteras e infraestructura. $2.3 millones para mejoras de instalaciones escolares. El presupuesto de seguridad publica se redujo en $890,000 debido al reemplazo diferido de la flota.',
+      deadlines: [
+        '12 de abril: Cierre del periodo de comentarios publicos',
+        '18 de abril, 7pm: Audiencia del presupuesto en el Ayuntamiento',
+        '1 de mayo: Votacion final del Concejo Municipal',
+      ],
+      context:
+        'Este presupuesto sigue dos anos de tasas de impuestos a la propiedad sin cambios. La asignacion para reparacion de carreteras responde a una evaluacion de infraestructura de 2025 que califico el 34% de las carreteras de la ciudad en condicion "deficiente". El financiamiento de instalaciones escolares aborda el hacinamiento en tres escuelas primarias.',
+      key_quotes: [
+        'La tasa propuesta de $1.21 por cada $100 de valor tasado representa una inversion necesaria en infraestructura que se ha diferido por demasiado tiempo.',
+        'El reemplazo de la flota de Seguridad Publica se diferira al AF2027-28, ahorrando $890,000 en el ciclo actual.',
+      ],
+      document_type: 'budget',
+    },
+  },
+};
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -170,8 +199,8 @@ export default async function BriefPage({ params }: PageProps) {
           confidenceScore={MOCK_BRIEF.confidenceScore}
           confidenceLevel={MOCK_BRIEF.confidenceLevel}
           currentLanguage="en"
-          availableLanguages={['en']}
-          translations={{}}
+          availableLanguages={['en', 'es']}
+          translations={MOCK_TRANSLATIONS}
           briefId="demo"
           helpfulCount={0}
           isSignedIn={false}

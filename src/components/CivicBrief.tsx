@@ -83,9 +83,9 @@ export default function CivicBrief({
   verification,
   currentLanguage,
   availableLanguages,
-  translations,
+  translations: initialTranslations,
   onLanguageChange,
-  languageLoading,
+  languageLoading: externalLoading,
   briefId,
   helpfulCount = 0,
   userFeedback,
@@ -93,15 +93,62 @@ export default function CivicBrief({
   isDemo = false,
 }: CivicBriefProps) {
   const [showVerification, setShowVerification] = useState(false);
+  const [activeLang, setActiveLang] = useState(currentLanguage);
+  const [translations, setTranslations] = useState(initialTranslations || {});
+  const [translating, setTranslating] = useState(false);
+
+  // All supported languages for non-demo briefs
+  const displayLanguages = isDemo
+    ? availableLanguages
+    : ['en', 'es', 'hi'];
+
+  const handleLanguageChange = async (lang: string) => {
+    if (onLanguageChange) {
+      onLanguageChange(lang);
+      return;
+    }
+
+    // Already have this translation cached
+    if (lang === currentLanguage || translations[lang]) {
+      setActiveLang(lang);
+      return;
+    }
+
+    // Fetch translation on-the-fly
+    if (!briefId || isDemo) return;
+    setTranslating(true);
+    setActiveLang(lang);
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ briefId, targetLanguage: lang }),
+      });
+
+      if (!res.ok) throw new Error('Translation failed');
+
+      const data = await res.json();
+      setTranslations((prev) => ({
+        ...prev,
+        [lang]: { headline: data.headline, content: data.content },
+      }));
+    } catch {
+      // Revert to previous language on failure
+      setActiveLang(currentLanguage);
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   // Use translated content if available
   const activeContent =
-    currentLanguage !== 'en' && translations?.[currentLanguage]
-      ? translations[currentLanguage].content
+    activeLang !== currentLanguage && translations[activeLang]
+      ? translations[activeLang].content
       : content;
   const activeHeadline =
-    currentLanguage !== 'en' && translations?.[currentLanguage]
-      ? translations[currentLanguage].headline
+    activeLang !== currentLanguage && translations[activeLang]
+      ? translations[activeLang].headline
       : headline;
 
   return (
@@ -151,12 +198,12 @@ export default function CivicBrief({
           }}
         >
           <ConfidenceScore score={confidenceScore} level={confidenceLevel} />
-          {availableLanguages.length > 1 && onLanguageChange && (
+          {displayLanguages.length > 1 && (
             <LanguageToggle
-              current={currentLanguage}
-              available={availableLanguages}
-              onChange={onLanguageChange}
-              loading={languageLoading}
+              current={activeLang}
+              available={displayLanguages}
+              onChange={handleLanguageChange}
+              loading={translating || externalLoading}
             />
           )}
         </div>
