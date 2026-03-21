@@ -257,3 +257,69 @@ export interface PipelineStatus {
   step: PipelineStep;
   message: string;
 }
+
+// ─── Feed Ingestion Types (C7) ───
+
+export interface Feed {
+  id: string;
+  jurisdiction_id: string;
+  document_type_id: number | null;
+  name: string;
+  feed_url: string;
+  feed_type: FeedType;
+  expected_domain: string | null;
+  is_active: boolean;
+  last_polled_at: string | null;
+  last_successful_poll_at: string | null;
+  last_seen_item_guid: string | null;
+  etag: string | null;
+  last_modified: string | null;
+  consecutive_failures: number;
+  max_items_per_poll: number;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export type FeedType = 'rss' | 'atom' | 'json_api' | 'legistar';
+export const FEED_TYPES: readonly FeedType[] = ['rss', 'atom', 'json_api', 'legistar'] as const;
+
+export type PollRunStatus = 'running' | 'completed' | 'partial' | 'failed';
+export const POLL_RUN_STATUSES: readonly PollRunStatus[] = ['running', 'completed', 'partial', 'failed'] as const;
+
+export interface FeedPollRun {
+  id: string;
+  started_at: string;
+  completed_at: string | null;
+  status: PollRunStatus;
+  feeds_dispatched: number;
+  total_items_processed: number;
+  total_items_skipped: number;
+  total_errors: number;
+  total_new_briefs: number;
+  duration_ms: number | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface FeedPollRunItem {
+  id: string;
+  run_id: string;
+  feed_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  items_found: number;
+  items_processed: number;
+  items_skipped: number;
+  items_deferred: number;
+  new_briefs_created: number;
+  skipped_formats: Record<string, number>;
+  errors: Array<{ message: string; item_url?: string; timestamp: string }>;
+  duration_ms: number | null;
+  created_at: string;
+}
+
+export interface UserJurisdiction {
+  user_id: string;
+  jurisdiction_id: string;
+  is_primary: boolean;
+  notify: boolean;
+  created_at: string;
+}
