@@ -193,6 +193,123 @@ ADMIN_EMAIL                     # Alert recipient for feed failures
 
 ---
 
+## Testing
+
+### File Naming
+
+| Test type | Location | Naming | Example |
+|-----------|----------|--------|---------|
+| Unit | `tests/unit/` | `{module}.test.ts` | `ssrf.test.ts`, `pipeline.test.ts` |
+| Unit (subfolder) | `tests/unit/{domain}/` | `{module}.test.ts` | `tests/unit/feeds/fetchers.test.ts` |
+| Component | `tests/unit/` | `{Component}.test.tsx` | `ConfidenceScore.test.tsx` |
+| Integration | `tests/integration/` | `{feature}.test.ts` | `ingest-feed.test.ts` |
+| E2E (Playwright) | `tests/e2e/` | `{feature}.spec.ts` | `pages.spec.ts`, `upload.spec.ts` |
+
+Mirror `src/` structure in `tests/unit/` where possible:
+```
+src/lib/feeds/dedup.ts         → tests/unit/feeds/dedup.test.ts
+src/lib/ssrf.ts                → tests/unit/ssrf.test.ts
+src/components/CivicBrief.tsx  → tests/unit/CivicBrief.test.tsx
+```
+
+### Test `describe` Blocks
+- Top level: module or component name, matching the file
+- Nested: group by function or behavior
+- Use the actual function/component name, not prose descriptions
+
+```typescript
+// Good
+describe('ssrf', () => {
+  describe('validateFetchTarget', () => {
+    it('rejects private IPv4 addresses', () => { ... });
+    it('rejects IPv6 loopback', () => { ... });
+    it('allows valid public HTTPS URLs', () => { ... });
+  });
+});
+
+// Bad
+describe('SSRF Protection Module', () => {
+  describe('when validating URLs', () => {
+    it('should not allow private IPs', () => { ... });
+  });
+});
+```
+
+### Test Case Naming (`it` / `test`)
+- Start with a verb: `rejects`, `returns`, `throws`, `renders`, `displays`, `navigates`
+- Describe the behavior, not the implementation
+- No `should` prefix (redundant inside `it`)
+
+```typescript
+// Good
+it('rejects URLs resolving to 127.0.0.1', () => { ... });
+it('returns 401 when HMAC signature is invalid', () => { ... });
+it('renders confidence badge in green for high scores', () => { ... });
+
+// Bad
+it('should work correctly', () => { ... });
+it('test SSRF', () => { ... });
+```
+
+### Playwright E2E Naming
+- `test.describe`: page or feature name
+- `test`: user-centric action description
+
+```typescript
+// Good
+test.describe('Upload Page', () => {
+  test('submits PDF and displays civic brief', async ({ page }) => { ... });
+  test('shows error for non-PDF files', async ({ page }) => { ... });
+});
+
+test.describe('Upload Page @mobile', () => {
+  test('shows responsive layout on Pixel 5', async ({ page }) => { ... });
+});
+
+// Bad
+test.describe('Tests for upload', () => {
+  test('test1', async ({ page }) => { ... });
+});
+```
+
+### Playwright Conventions
+- Page objects: `PascalCase` class in `tests/e2e/pages/`: `UploadPage.ts`, `BriefPage.ts`
+- Fixtures: `tests/e2e/fixtures/`: `test-pdf.pdf`, `malformed.pdf`
+- Tags for filtering: `@mobile`, `@a11y`, `@security`, `@smoke`
+- Viewport presets: always test both desktop (1280x720) and mobile (Pixel 5)
+
+### Test Data and Fixtures
+- Fixture files: `tests/fixtures/{type}/`: `tests/fixtures/pdf/valid-budget.pdf`
+- Factory functions: `tests/helpers/factories.ts`: `createMockFeed()`, `createMockBrief()`
+- Mock responses: `tests/helpers/mocks.ts`: `mockLegistarResponse()`, `mockRssResponse()`
+- Constants: `tests/helpers/constants.ts`: `TEST_JURISDICTION_ID`, `TEST_FEED_URL`
+
+```typescript
+// Factory naming: create{Thing}(overrides?)
+export function createMockFeed(overrides?: Partial<Feed>): Feed {
+  return {
+    id: crypto.randomUUID(),
+    name: 'Test Feed',
+    feed_url: 'https://example.gov/rss',
+    feed_type: 'rss',
+    is_active: true,
+    ...overrides,
+  };
+}
+```
+
+### Test Helper Naming
+- Assertion helpers: `expect{Condition}()`: `expectValidHmac()`, `expectSsrfBlocked()`
+- Setup helpers: `setup{Context}()`: `setupTestFeed()`, `setupPollRun()`
+- Cleanup helpers: `cleanup{Resource}()`: `cleanupTestData()`
+
+### Security Test Patterns
+- Group under `describe('security', () => { ... })` within relevant test files
+- Tag with `@security` in Playwright for selective runs
+- Name explicitly: `'blocks XXE entity expansion in RSS feed'`, not `'handles bad XML'`
+
+---
+
 ## Events and Metrics
 
 ### Usage Events (`usage_events.event_type`)
