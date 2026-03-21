@@ -41,7 +41,7 @@ describe('GET /api/cron/digest', () => {
     };
   }
 
-  it('returns 401 without x-vercel-cron-secret header', async () => {
+  it('returns 401 without Authorization header', async () => {
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest');
     const res = await GET(req);
@@ -51,7 +51,7 @@ describe('GET /api/cron/digest', () => {
   it('returns 401 with wrong cron secret', async () => {
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': 'wrong-secret' },
+      headers: { 'authorization': 'Bearer wrong-secret' },
     });
     const res = await GET(req);
     expect(res.status).toBe(401);
@@ -65,7 +65,7 @@ describe('GET /api/cron/digest', () => {
 
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': TEST_CRON_SECRET },
+      headers: { 'authorization': `Bearer ${TEST_CRON_SECRET}` },
     });
     const res = await GET(req);
     expect(res.status).toBe(503);
@@ -80,7 +80,7 @@ describe('GET /api/cron/digest', () => {
 
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': TEST_CRON_SECRET },
+      headers: { 'authorization': `Bearer ${TEST_CRON_SECRET}` },
     });
     const res = await GET(req);
     expect(res.status).toBe(200);
@@ -98,7 +98,7 @@ describe('GET /api/cron/digest', () => {
 
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': TEST_CRON_SECRET },
+      headers: { 'authorization': `Bearer ${TEST_CRON_SECRET}` },
     });
     const res = await GET(req);
     const body = await res.json();
@@ -120,7 +120,7 @@ describe('GET /api/cron/digest', () => {
 
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': TEST_CRON_SECRET },
+      headers: { 'authorization': `Bearer ${TEST_CRON_SECRET}` },
     });
     const res = await GET(req);
     expect(res.status).toBe(200);
@@ -140,7 +140,7 @@ describe('GET /api/cron/digest', () => {
 
     const { GET } = await import('@/app/api/cron/digest/route');
     const req = new NextRequest('http://localhost:3000/api/cron/digest', {
-      headers: { 'x-vercel-cron-secret': TEST_CRON_SECRET },
+      headers: { 'authorization': `Bearer ${TEST_CRON_SECRET}` },
     });
     const res = await GET(req);
     expect(res.status).toBe(200);

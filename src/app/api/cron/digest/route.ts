@@ -4,9 +4,10 @@ import { getServerClient } from '@/lib/supabase';
 import { buildDigestSummary, buildDigestHtml } from '@/lib/email/digest';
 
 export async function GET(request: NextRequest) {
-  // 1. Validate CRON_SECRET (timing-safe)
+  // 1. Validate CRON_SECRET (Vercel sends Authorization: Bearer <CRON_SECRET>)
   const cronSecret = process.env.CRON_SECRET;
-  const headerSecret = request.headers.get('x-vercel-cron-secret');
+  const authHeader = request.headers.get('authorization');
+  const headerSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   if (!cronSecret || !headerSecret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

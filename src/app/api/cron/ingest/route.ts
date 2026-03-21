@@ -27,13 +27,14 @@ function signFeedDispatch(feedId: string, runId: string, timestamp: number, secr
 // ─── Handler ─────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  // 1. Validate CRON_SECRET (Vercel injects x-vercel-cron-secret on cron invocations)
+  // 1. Validate CRON_SECRET (Vercel sends Authorization: Bearer <CRON_SECRET>)
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
     return NextResponse.json({ error: 'Server misconfiguration: CRON_SECRET not set' }, { status: 500 });
   }
 
-  const providedSecret = request.headers.get('x-vercel-cron-secret');
+  const authHeader = request.headers.get('authorization');
+  const providedSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!validateCronSecret(providedSecret, cronSecret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
