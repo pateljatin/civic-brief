@@ -152,7 +152,7 @@ export async function processCivicDocument(params: PipelineParams): Promise<Pipe
       .from('document_types')
       .select('id')
       .eq('slug', slugToResolve)
-      .single();
+      .maybeSingle();
     if (dt) documentTypeId = (dt as { id: number }).id;
   }
 

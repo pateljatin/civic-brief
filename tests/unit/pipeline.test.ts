@@ -69,6 +69,9 @@ describe('pipeline', () => {
             single: vi
               .fn()
               .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
+            maybeSingle: vi
+              .fn()
+              .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
           }),
         }),
       });
@@ -259,6 +262,9 @@ describe('pipeline', () => {
             single: vi
               .fn()
               .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
+            maybeSingle: vi
+              .fn()
+              .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
           }),
         }),
       });
@@ -322,6 +328,9 @@ describe('pipeline', () => {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi
+              .fn()
+              .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
+            maybeSingle: vi
               .fn()
               .mockResolvedValue({ data: { id: 1, slug: 'resolution' }, error: null }),
           }),

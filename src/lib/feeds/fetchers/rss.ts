@@ -17,7 +17,10 @@ const parser = new Parser({
 
 export class RssFetcher implements FeedFetcher {
   async fetch(feed: Feed): Promise<FetchResult> {
-    // SSRF validation before any outbound request
+    // SSRF validation before any outbound request.
+    // Note: DNS rebinding (TOCTOU) is a known limitation; the resolved IP from
+    // validateFetchTarget is not passed to fetch(). Vercel's egress controls
+    // provide an additional layer of protection in production.
     const validation = await validateFetchTarget(feed.feed_url);
     if (!validation.valid) {
       throw new Error(`SSRF validation failed: ${validation.error}`);
@@ -81,24 +84,27 @@ export class RssFetcher implements FeedFetcher {
     const newEtag = response.headers.get('etag');
     const newLastModified = response.headers.get('last-modified');
 
-    // Map parsed items to our FeedItem shape
-    const allItems: FeedItem[] = (parsed.items ?? []).map((item) => {
-      // rss-parser normalizes link across RSS (<link>) and Atom (<link href="..."/>)
-      const url = item.link ?? '';
-      const guid = item.guid ?? item.id ?? url;
+    // Map parsed items to our FeedItem shape, filtering out entries with no URL
+    const allItems: FeedItem[] = (parsed.items ?? [])
+      .map((item) => {
+        // rss-parser normalizes link across RSS (<link>) and Atom (<link href="..."/>)
+        const url = item.link ?? '';
+        const guid = item.guid ?? item.id ?? url;
 
-      return {
-        guid,
-        title: item.title ?? '',
-        url,
-        published_at: item.pubDate ?? item.isoDate ?? null,
-        content_type: null, // determined at download time
-        metadata: {},
-      };
-    });
+        return {
+          guid,
+          title: item.title ?? '',
+          url,
+          published_at: item.pubDate ?? item.isoDate ?? null,
+          content_type: null, // determined at download time
+          metadata: {},
+        };
+      })
+      .filter((item) => item.url.length > 0);
 
-    // Respect max_items_per_poll limit
-    const items = allItems.slice(0, feed.max_items_per_poll);
+    // Respect max_items_per_poll limit (guard against 0 or negative)
+    const limit = feed.max_items_per_poll > 0 ? feed.max_items_per_poll : 10;
+    const items = allItems.slice(0, limit);
 
     return {
       feed_id: feed.id,

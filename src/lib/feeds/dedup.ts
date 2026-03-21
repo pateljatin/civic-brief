@@ -30,7 +30,7 @@ export async function checkFeedItemDuplicate(
     db = getServerClient();
   } catch {
     // DB unavailable: allow processing to continue rather than block ingestion
-    return NOT_DUPLICATE;
+    return { ...NOT_DUPLICATE };
   }
 
   // Layer 1 & 2: look up by URL
