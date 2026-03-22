@@ -49,3 +49,4 @@ docs/research/private/
 # misc
 *.log
 npm-debug.log*
+.vercel
