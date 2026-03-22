@@ -82,6 +82,65 @@ src/
     page.tsx                       # MODIFIED: add "See it in action" link
 ```
 
+### Render Trees
+
+**`/showcase` page:**
+```
+showcase/page.tsx (Server Component)
+  <main>
+    <h1> "Five Stories. Five Communities."
+    <p> subtitle
+    {scenarios.map((scenario, i) => (
+      <ScrollFadeIn delay={i * 100}>        // 'use client', IntersectionObserver
+        <ScenarioCard>                       // Server Component (receives pre-fetched data)
+          <a href="/showcase/{slug}" aria-label="Read about {title} - {jurisdiction}">
+            <div> icon panel (emoji + gradient bg)
+            <div> content
+              <h2> title
+              <p> narrative
+              <span> jurisdiction badge
+              <ConfidenceCountUp value={confidence}>  // 'use client', rAF animation
+              <span> arrow →
+          </a>
+        </ScenarioCard>
+      </ScrollFadeIn>
+    ))}
+  </main>
+```
+
+**`/showcase/[scenario]` page:**
+```
+showcase/[scenario]/page.tsx (Server Component)
+  → notFound() if slug not in scenarios config
+  <main>
+    <a href="/showcase"> ← Back to all stories
+    <ScenarioHero>                           // Server Component
+      <div> icon + gradient
+      <h1> title
+      <p> story (full paragraph)
+      <span> jurisdiction
+      <span> document title
+      <ConfidenceScore score={factuality_score}>  // EXISTING, expects 0-1 float
+      <SourceLink url={sourceUrl}>                // EXISTING
+    </ScenarioHero>
+    <CivicBrief                              // EXISTING, 'use client'
+      briefId={briefId}
+      content={brief.content}
+      headline={brief.headline}
+      confidenceScore={sources.factuality_score}  // 0-1 float
+      confidenceLevel={sources.confidence_level}
+      sourceUrl={sources.source_url}
+      sourceTitle={sources.title}
+      language={brief.languages.bcp47}
+      availableLanguages={availableLanguages}      // pre-fetched from briefs table
+      isDemo={false}                               // real briefs, real source links
+    />
+  </main>
+```
+
+**`page.tsx` (homepage) — insertion point:**
+The "See it in action" link is inserted between the Pipeline section (`.l-pipeline`, ~line 230) and the Verification section (`.l-verify-wrap`, ~line 251).
+
 ---
 
 ## 4. Static Config Shape
@@ -98,9 +157,18 @@ export interface ScenarioConfig {
   narrative: string;       // 1-2 sentence human hook (showcase card)
   story: string;           // fuller paragraph (detail page hero)
   documentTitle: string;   // original document name
-  briefId: string;         // UUID from briefs table (populated after processing)
+  briefId: string | null;  // UUID from briefs table (null until document is processed)
   sourceUrl: string;       // URL to original government document
 }
+
+export function getScenarioBySlug(slug: string): ScenarioConfig | undefined;
+```
+
+**Note:** `briefId` is `string | null`. Before documents are sourced, it is `null`. Components handle this: ScenarioCard shows "Coming soon" in place of narrative; detail page returns `notFound()` if briefId is null.
+
+**Confidence score scale:** The `ConfidenceCountUp` component displays 0-100 integers (rendered as `{value}%`). The Supabase `sources.factuality_score` is a 0-1 float. Conversion happens at the page level: `Math.round(factuality_score * 100)`. The existing `ConfidenceScore` component receives the raw 0-1 float unchanged.
+
+**Stale briefId maintenance:** If a document is re-processed (creating a new brief ID), the `briefId` in `showcase.ts` must be manually updated. This is acceptable for 5 curated entries.
 
 export const scenarios: ScenarioConfig[];
 ```
@@ -177,17 +245,38 @@ interface ScrollFadeInProps {
 
 Client component (`'use client'`). Uses `IntersectionObserver` with `threshold: 0.1` and `rootMargin: '0px 0px -40px 0px'`. Adds/removes a `visible` class that triggers the CSS transition. Fires once (unobserves after first intersection).
 
+**Five states:**
+| State | Rendered Output |
+|-------|-----------------|
+| Default (before intersection) | Children rendered with `opacity: 0`, `translateY(24px)` |
+| Default (after intersection) | Children rendered with `opacity: 1`, `translateY(0)` |
+| Loading | Not applicable (renders children immediately) |
+| Empty | Not applicable (always has children) |
+| Error | Not applicable (pure wrapper, no failure modes) |
+| No IntersectionObserver (SSR/old browser) | Children rendered fully visible (no animation). Fallback: render with `visible` class by default if `typeof IntersectionObserver === 'undefined'`. |
+
 ### ConfidenceCountUp
 
 **Props:**
 ```typescript
 interface ConfidenceCountUpProps {
-  value: number;            // 0-100
+  value: number;            // 0-100 (integer percentage)
   className?: string;
 }
 ```
 
 Client component (`'use client'`). On first viewport entry, animates from 0 to `value` over 800ms using `requestAnimationFrame` + ease-out curve. Renders as `{value}%`.
+
+**Five states:**
+| State | Rendered Output |
+|-------|-----------------|
+| Default (before viewport entry) | Renders `0%` (initial) |
+| Default (after animation) | Renders `{value}%` (final) |
+| Loading | Not applicable (value is a prop, not fetched) |
+| Empty | Not applicable (always has a value) |
+| Error | If value < 0 or > 100, clamp to 0-100 range |
+| Reduced motion | If `prefers-reduced-motion: reduce`, skip animation and render `{value}%` immediately. Check via `window.matchMedia('(prefers-reduced-motion: reduce)')` on mount. |
+| No IntersectionObserver | Render `{value}%` immediately (no animation). |
 
 ---
 
@@ -205,7 +294,9 @@ All animations are CSS-only (no animation libraries).
 | Confidence count-up | First viewport entry | 800ms | ease-out | text content (JS) |
 | Brief content fade | Page mount | 300ms, 200ms delay | ease-out | opacity |
 
-**Reduced motion:** All animations respect `prefers-reduced-motion: reduce`. When reduced motion is preferred, all transitions are instant (0ms duration).
+**Reduced motion:** All animations respect `prefers-reduced-motion: reduce`. When reduced motion is preferred:
+- CSS transitions: `0ms` duration via `@media (prefers-reduced-motion: reduce)` in globals.css
+- JS count-up (ConfidenceCountUp): check `window.matchMedia('(prefers-reduced-motion: reduce)')` on mount; if true, render final value immediately without animation
 
 ---
 
@@ -215,6 +306,13 @@ All animations are CSS-only (no animation libraries).
 |------------|--------|
 | Desktop (>768px) | Cards: icon panel (80px) + content side by side. Max-width 800px centered. |
 | Mobile (<=768px) | Cards: icon panel as header bar (emoji + title + arrow in row), narrative below. Full-width with 16px padding. |
+
+**Detail page (`/showcase/[scenario]`) responsive:**
+
+| Breakpoint | Layout |
+|------------|--------|
+| Desktop (>768px) | ScenarioHero: icon left, text right, max-width 800px centered. CivicBrief below at max-width 640px. |
+| Mobile (<=768px) | ScenarioHero: icon centered above title, story text full-width with 16px padding, font-size 15px. CivicBrief stacks naturally. |
 
 ---
 
@@ -232,7 +330,7 @@ All animations are CSS-only (no animation libraries).
 
 ## 9. Homepage Change
 
-Add a single "See it in action" link/button in the existing homepage, below the pipeline steps section and above the stats section. Links to `/showcase`.
+Add a single "See it in action" link/button in the existing homepage, between the Pipeline section (`.l-pipeline`) and the Verification section (`.l-verify-wrap`). Links to `/showcase`.
 
 **Render condition:** Always visible. No loading/empty/error states (it's a static link).
 
@@ -252,8 +350,15 @@ Add a single "See it in action" link/button in the existing homepage, below the 
 - Each card links to correct `/showcase/[slug]`
 - Each detail page renders narrative hero + civic brief content
 - Multilingual scenario: language toggle works, switches brief content
+- `/showcase/nonexistent-slug` returns 404
 - Accessibility: axe-core scan on `/showcase` and one detail page
 - Security headers present on all new routes
+
+### Edge Case Tests (Unit)
+- `ConfidenceCountUp`: renders final value immediately when reduced motion is preferred
+- `ScrollFadeIn`: renders children visible when IntersectionObserver is unavailable
+- `ScenarioCard`: renders "Coming soon" when briefId is null
+- Showcase grid: gracefully handles 1 of 5 briefs missing from DB (4 cards render normally, 1 shows error)
 
 ---
 
@@ -270,6 +375,7 @@ Add a single "See it in action" link/button in the existing homepage, below the 
 - Analytics events for showcase interactions
 - Mobile app-specific behavior beyond responsive CSS
 - Narrative text for characters (Maria, James, etc.) from PRD -- we write new context-appropriate copy
+- i18n of showcase UI chrome (card titles, narratives, hero stories are English-only; only CivicBrief content switches languages)
 
 ---
 
@@ -287,6 +393,8 @@ Before implementation, manually source and process:
 
 Each document is processed once via the upload page. The resulting brief UUID is recorded in `src/lib/showcase.ts`.
 
+**For the multilingual scenario:** After initial processing (creates EN brief), use the upload page's language toggle to generate ES and HI translations via `/api/translate`. This creates additional brief rows sharing the same `source_id`, which the detail page uses for the LanguageToggle.
+
 ---
 
 ## 13. Concurrent Request Scenarios
@@ -297,17 +405,34 @@ Not applicable -- no write paths in this feature. All showcase data is read-only
 
 ## 14. Platform API Contracts
 
-**Supabase read:**
+**Batch fetch for /showcase grid (one round trip):**
 ```typescript
-// Fetch brief by ID
-const { data, error } = await supabaseServer
+const { data: briefs, error } = await supabaseServer
   .from('briefs')
-  .select('*')
+  .select('id, headline, content, source_id, sources(factuality_score, confidence_level)')
+  .in('id', scenarios.filter(s => s.briefId).map(s => s.briefId));
+```
+Returns array. Match back to scenarios by `brief.id === scenario.briefId`. Scenarios with null briefId or missing brief render the error state.
+
+**Detail fetch for /showcase/[scenario] (with joins):**
+```typescript
+const { data: brief, error } = await supabaseServer
+  .from('briefs')
+  .select('id, headline, content, source_id, sources(source_url, title, factuality_score, confidence_level), languages(bcp47)')
   .eq('id', briefId)
   .maybeSingle();
 ```
 
-Uses `.maybeSingle()` per Supabase patterns (brief may have been deleted). Error state renders "Brief unavailable" in the card/hero.
+**Available languages fetch (for multilingual scenario toggle):**
+```typescript
+const { data: translations } = await supabaseServer
+  .from('briefs')
+  .select('id, languages(bcp47)')
+  .eq('source_id', brief.source_id);
+```
+Returns all briefs sharing the same source document, giving us the list of available languages for the LanguageToggle.
+
+Uses `.maybeSingle()` per Supabase patterns (brief may have been deleted). If null, detail page returns `notFound()`.
 
 ---
 
