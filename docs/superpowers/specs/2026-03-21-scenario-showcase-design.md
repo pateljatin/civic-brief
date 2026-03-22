@@ -8,11 +8,11 @@
 
 ## 1. Purpose and Success Criteria
 
-Build a `/showcase` route presenting 5 pre-processed civic briefs, one per PRD scenario (Budget, School Board, Zoning, State Legislation, Multilingual), using real Washington State government documents. Each card tells a human story and links to a curated detail page with narrative context + the full civic brief.
+Build a `/showcase` route presenting 5 pre-processed civic briefs, one per PRD scenario (Budget, School Board, Zoning, State Legislation, Health Insurance), using real government documents. Each card tells a human story and links to a curated detail page with narrative context + the full civic brief.
 
 **Success criteria:**
-- 5 real WA government PDFs processed through the existing pipeline
-- `/showcase` renders all 5 story cards with Apple-style scroll animations
+- 5 real government PDFs processed through the existing pipeline (3 local WA, 1 state WA, 1 federal US+CA)
+- `/showcase` renders all 5 story cards with scroll-triggered animations via IntersectionObserver
 - `/showcase/[scenario]` renders narrative context + CivicBrief component
 - Homepage links to showcase
 - Mobile-first responsive layout
@@ -27,17 +27,21 @@ Build a `/showcase` route presenting 5 pre-processed civic briefs, one per PRD s
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
 | 1 | Route location | `/showcase` (new route) | Homepage stays as-is; showcase can later become homepage when mission moves to `/about` |
-| 2 | Document source | Real WA government PDFs from seed jurisdictions | Consistent with existing jurisdiction data (Seattle, King County, Sammamish, Issaquah, WA State) |
+| 2 | Document source | Real government PDFs from seed jurisdictions + federal | 3 local (Seattle, Sammamish, Issaquah), 1 state (WA), 1 federal (US/CA) |
 | 3 | Card layout | Option D: vertical story cards with colored icon panels | B's storytelling + C's visual polish. All 5 visible without scrolling. |
 | 4 | Detail page | `/showcase/[scenario]` with narrative header + CivicBrief | Human context before data; reuses existing CivicBrief component |
-| 5 | Animations | Apple-style CSS-only (no Framer Motion/GSAP) | Scroll fade-in, hover scale, page load slideUp, confidence count-up |
+| 5 | Animations | Polished motion design with GPU-composited transitions, CSS-only (no Framer Motion/GSAP) | Scroll-triggered animations via IntersectionObserver, micro-interactions (hover scale, shadow lift, arrow nudge), staggered reveal with transition-delay, confidence count-up |
 | 6 | Data model | Static config array + Supabase brief IDs | No new tables, no new migrations |
 | 7 | Document processing | Manual one-time via existing `/api/summarize` | No new API routes needed |
 | 8 | Navigation | Homepage gets "See it in action" link to `/showcase` | Minimal homepage change |
 
+**Multilingual is a cross-cutting feature, not a scenario.** The language toggle (LanguageToggle component) is available on every `/showcase/[scenario]` detail page where translations exist in the briefs table. It is not limited to a single scenario. The health insurance scenario naturally demonstrates English + Spanish because Covered California publishes bilingual materials, but any scenario with translated briefs gets the toggle.
+
 ---
 
 ## 3. Architecture
+
+All new files, components, routes, and test files follow `docs/standards/NAMING_CONVENTIONS.md`.
 
 ### Data Flow
 
@@ -175,13 +179,13 @@ export const scenarios: ScenarioConfig[];
 
 **Scenarios:**
 
-| Slug | Title | Jurisdiction | Document Type |
-|------|-------|-------------|---------------|
-| `budget` | Budget Season | King County / Seattle, WA | City/county budget |
-| `school-board` | School Board | Issaquah, WA | School board resolution or minutes |
-| `zoning` | Zoning Change | Sammamish, WA | Zoning/land use proposal |
-| `legislation` | State Legislation | Washington State | State bill or legislative action |
-| `multilingual` | Multilingual | Seattle, WA | Public notice (EN/ES/HI) |
+| Slug | Title | Level | Jurisdiction | Document Type |
+|------|-------|-------|-------------|---------------|
+| `budget` | Budget Season | Local | King County / Seattle, WA | City/county budget |
+| `school-board` | School Board | Local | Issaquah, WA | School board resolution or minutes |
+| `zoning` | Zoning Change | Local | Sammamish, WA | Zoning/land use proposal |
+| `legislation` | State Legislation | State | Washington State | State bill or legislative action |
+| `health-insurance` | Health Insurance & Rx Costs | Federal | US Federal / California | CMS/HHS rule on drug pricing or insurance marketplace changes |
 
 ---
 
@@ -282,7 +286,7 @@ Client component (`'use client'`). On first viewport entry, animates from 0 to `
 
 ## 6. Animation Spec
 
-All animations are CSS-only (no animation libraries).
+All animations are CSS-only (no animation libraries). All motion design follows `docs/standards/DESIGN_PRINCIPLES.md`.
 
 | Animation | Trigger | Duration | Easing | Properties |
 |-----------|---------|----------|--------|------------|
@@ -349,10 +353,15 @@ Add a single "See it in action" link/button in the existing homepage, between th
 - `/showcase` loads, all 5 cards visible (desktop + mobile)
 - Each card links to correct `/showcase/[slug]`
 - Each detail page renders narrative hero + civic brief content
-- Multilingual scenario: language toggle works, switches brief content
+- Health insurance scenario: language toggle works (EN/ES), switches brief content
 - `/showcase/nonexistent-slug` returns 404
 - Accessibility: axe-core scan on `/showcase` and one detail page
 - Security headers present on all new routes
+
+### Regression Tests
+- Run full existing test suite before merge: `npm test` (228 unit/integration) + `npm run test:e2e` (60 E2E)
+- All must pass before merge
+- Any test that breaks = stop and investigate, do not skip
 
 ### Edge Case Tests (Unit)
 - `ConfidenceCountUp`: renders final value immediately when reduced motion is preferred
@@ -389,11 +398,11 @@ Before implementation, manually source and process:
 | School Board | Issaquah School District board resolution or meeting minutes | issaquah.wednet.edu |
 | Zoning | Sammamish or nearby city zoning/land use proposal | sammamish.us |
 | Legislation | WA state bill (housing, education, or transportation) | leg.wa.gov |
-| Multilingual | Seattle public notice (utility rates, public hearing, etc.) | seattle.gov |
+| Health Insurance | CMS/HHS final rule on drug pricing, insurance coverage, or marketplace changes | federalregister.gov or cms.gov |
 
 Each document is processed once via the upload page. The resulting brief UUID is recorded in `src/lib/showcase.ts`.
 
-**For the multilingual scenario:** After initial processing (creates EN brief), use the upload page's language toggle to generate ES and HI translations via `/api/translate`. This creates additional brief rows sharing the same `source_id`, which the detail page uses for the LanguageToggle.
+**For the health insurance scenario (multilingual angle):** After initial processing (creates EN brief), pair with a Covered California implementation notice (coveredca.com) in English + Spanish. Use the upload page's language toggle to generate ES translation via `/api/translate`. This creates additional brief rows sharing the same `source_id`, which the detail page uses for the LanguageToggle. Any scenario with translated briefs gets the language toggle automatically.
 
 ---
 
