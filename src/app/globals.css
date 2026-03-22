@@ -74,3 +74,100 @@ h1, h2, h3, h4 {
     gap: 8px !important;
   }
 }
+
+/* ── Scenario Showcase: scroll animations + card interactions ── */
+
+.scroll-fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 500ms ease-out, transform 500ms ease-out;
+}
+
+.scroll-fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scenario-hero-animate {
+  animation: slideUp 400ms ease-out forwards;
+}
+
+.showcase-brief-fade {
+  animation: slideUp 300ms ease-out 200ms forwards;
+  opacity: 0;
+}
+
+.scenario-card-link {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  border-radius: 12px;
+}
+
+.scenario-card-link:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.scenario-card-link:focus-visible {
+  outline: 2px solid var(--civic);
+  outline-offset: 2px;
+}
+
+.scenario-card-arrow {
+  transition: transform 200ms ease-out;
+}
+
+.scenario-card-link:hover .scenario-card-arrow {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-fade-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .scroll-fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .scenario-hero-animate {
+    animation: none;
+  }
+
+  .showcase-brief-fade {
+    animation: none;
+    opacity: 1;
+  }
+
+  .scenario-card-link {
+    transition: none;
+  }
+
+  .scenario-card-link:hover {
+    transform: none;
+  }
+
+  .scenario-card-arrow {
+    transition: none;
+  }
+
+  .scenario-card-link:hover .scenario-card-arrow {
+    transform: none;
+  }
+}
