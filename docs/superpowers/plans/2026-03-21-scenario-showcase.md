@@ -2,7 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 
-**Goal:** Build a `/showcase` route presenting 5 pre-processed civic briefs (one per PRD scenario) using real WA government documents, with Apple-style scroll animations, narrative context, and mobile-first responsive layout.
+**Goal:** Build a `/showcase` route presenting 5 pre-processed civic briefs (3 local WA, 1 state WA, 1 federal US+CA) with scroll-triggered animations, narrative context, and mobile-first responsive layout.
+
+**Standards:** All new code follows `docs/standards/NAMING_CONVENTIONS.md` and `docs/standards/DESIGN_PRINCIPLES.md`.
 
 **Spec:** `docs/superpowers/specs/2026-03-21-scenario-showcase-design.md`
 
@@ -20,7 +22,8 @@
 | 8 | Homepage modification | `src/app/page.tsx` | Via E2E (Task 10) | None |
 | 9 | CSS animations + globals | `src/app/globals.css` | Visual verification | None |
 | 10 | E2E tests | `tests/e2e/showcase.spec.ts` | 10+ specs x 2 viewports | Tasks 6, 7, 8 |
-| 11 | Document sourcing | Manual: find 5 real PDFs, process, record IDs | Manual verification | Tasks 6, 7 |
+| 11 | Regression suite | None (run existing) | 228 unit + 60 E2E must pass | Tasks 1-10 |
+| 12 | Document sourcing | Manual: find 5 real PDFs, process, record IDs | Manual verification | Tasks 6, 7 |
 
 ### Parallelization Note
 
@@ -28,7 +31,8 @@
 - **After Task 1:** Tasks 4, 5 can run in parallel
 - **After Tasks 2, 3, 4:** Task 6 can start
 - **After Task 5:** Task 7 can start
-- **Sequential tail:** Tasks 10, 11 run after all UI tasks complete
+- **Sequential tail:** Tasks 10, 11, 12 run after all UI tasks complete
+- **Regression (Task 11):** Runs AFTER Task 10, BEFORE Task 12. Gate: all existing tests must pass before document sourcing begins.
 
 ---
 
@@ -61,7 +65,7 @@ describe('showcase config', () => {
     expect(slugs).toContain('school-board');
     expect(slugs).toContain('zoning');
     expect(slugs).toContain('legislation');
-    expect(slugs).toContain('multilingual');
+    expect(slugs).toContain('health-insurance');
   });
 
   it.each(['slug', 'title', 'icon', 'color', 'jurisdiction', 'narrative', 'story', 'documentTitle', 'briefId', 'sourceUrl'] as const)(
@@ -110,7 +114,7 @@ Scenario data per the spec:
 | `school-board` | School Board | `\u{1F3EB}` | `#8b5cf6` | Issaquah, WA |
 | `zoning` | Zoning Change | `\u{1F3D7}` | `#10b981` | Sammamish, WA |
 | `legislation` | State Legislation | `\u{1F4DC}` | `#3b82f6` | Washington State |
-| `multilingual` | Multilingual | `\u{1F310}` | `#ec4899` | Seattle, WA |
+| `health-insurance` | Health Insurance & Rx Costs | `\u{1F3E5}` | `#ec4899` | US Federal / California |
 
 Write narrative (1-2 sentence human hook) and story (fuller paragraph) for each. The narrative appears on the card; the story appears on the detail page hero. Write from the citizen's perspective, not the government's.
 
@@ -781,7 +785,7 @@ test.describe('Showcase page', () => {
 
   test('each card has correct link', async ({ page }) => {
     await page.goto('/showcase');
-    const expectedSlugs = ['budget', 'school-board', 'zoning', 'legislation', 'multilingual'];
+    const expectedSlugs = ['budget', 'school-board', 'zoning', 'legislation', 'health-insurance'];
     for (const slug of expectedSlugs) {
       await expect(page.locator(`a[href="/showcase/${slug}"]`)).toBeVisible();
     }
@@ -793,7 +797,7 @@ test.describe('Showcase page', () => {
     await expect(page.getByText('School Board')).toBeVisible();
     await expect(page.getByText('Zoning Change')).toBeVisible();
     await expect(page.getByText('State Legislation')).toBeVisible();
-    await expect(page.getByText('Multilingual')).toBeVisible();
+    await expect(page.getByText('Health Insurance')).toBeVisible();
   });
 
   test('passes accessibility checks', async ({ page }) => {
@@ -865,7 +869,41 @@ All E2E tests pass on both desktop and mobile (Pixel 5) viewports. Run `npx play
 
 ---
 
-### Task 11: Document Sourcing (Manual Step)
+### Task 11: Regression Suite
+
+**Files:** None (run existing tests)
+
+- [ ] **Step 1: Run full unit/integration suite**
+
+```bash
+npm test
+```
+
+All 228+ existing tests must pass. If any fail, stop and investigate. Do not skip failing tests.
+
+- [ ] **Step 2: Run full E2E suite**
+
+```bash
+npx playwright test tests/e2e/pages.spec.ts
+```
+
+All 60 existing E2E tests must pass (desktop + mobile viewports). If any fail, the showcase feature has broken existing functionality.
+
+- [ ] **Step 3: Type check**
+
+```bash
+npx tsc --noEmit
+```
+
+Zero type errors.
+
+- [ ] **Step 4: Verify**
+
+All three commands pass clean. The showcase feature has not introduced regressions. Proceed to document sourcing.
+
+---
+
+### Task 12: Document Sourcing (Manual Step)
 
 **Files:**
 - Modify: `src/lib/showcase.ts` (update briefIds and sourceUrls)
@@ -882,7 +920,9 @@ Search for and record one PDF per scenario:
 | School Board | Issaquah School District board resolution or meeting minutes | issaquah.wednet.edu |
 | Zoning | Sammamish or nearby city zoning/land use proposal | sammamish.us |
 | Legislation | WA state bill (housing, education, or transportation) | leg.wa.gov |
-| Multilingual | Seattle public notice (utility rates, public hearing) | seattle.gov |
+| Health Insurance | CMS/HHS final rule on drug pricing, insurance coverage, or marketplace changes | federalregister.gov, cms.gov |
+
+**For multilingual:** After processing the health insurance document (EN), generate ES translation via `/api/translate`. Pair with Covered California implementation notice if available (coveredca.com).
 
 Record each URL. Verify the PDF is publicly accessible and under 10MB.
 
@@ -907,11 +947,11 @@ Navigate to `/showcase`. All 5 cards should show real confidence scores. Click e
 
 ## Post-Implementation Checklist
 
-- [ ] All existing tests still pass: `npm test` (228+ unit/integration tests)
-- [ ] All existing E2E tests still pass: `npx playwright test tests/e2e/pages.spec.ts`
+- [ ] Regression suite passed (Task 11): `npm test` + `npx playwright test tests/e2e/pages.spec.ts` + `npx tsc --noEmit`
 - [ ] New unit tests pass: `npx vitest run tests/unit/showcase.test.ts tests/unit/scroll-fade-in.test.tsx tests/unit/confidence-count-up.test.tsx tests/unit/scenario-card.test.tsx tests/unit/scenario-hero.test.tsx`
 - [ ] New E2E tests pass: `npx playwright test tests/e2e/showcase.spec.ts`
-- [ ] No TypeScript errors: `npx tsc --noEmit`
 - [ ] Responsive layout verified at 768px breakpoint
 - [ ] Reduced motion verified in Chrome DevTools
-- [ ] 5 real government PDFs processed and IDs recorded
+- [ ] All animations follow `docs/standards/DESIGN_PRINCIPLES.md` (GPU-composited only, 200-500ms, ease-out)
+- [ ] All naming follows `docs/standards/NAMING_CONVENTIONS.md`
+- [ ] 5 real government PDFs processed and IDs recorded (3 local WA, 1 state WA, 1 federal US+CA)
