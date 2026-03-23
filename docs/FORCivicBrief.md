@@ -186,6 +186,18 @@ civic-brief/
   landing-static.html        -- Original landing page, preserved.
 ```
 
+## Post-Demo Features (Shipped March 2026)
+
+After the initial demo (C1-C6), two major features were shipped as part of the v1.1 Trust Loop milestone:
+
+**C7: Automatic Document Feed Ingestion (PR #34, merged March 21, 2026)**
+
+The demo required manual PDF uploads. C7 added an automated pipeline that monitors government RSS feeds, Legistar REST APIs, and OpenStates JSON APIs. A daily cron job (6am UTC) orchestrates feed polling, dispatching HMAC-authenticated requests to a worker endpoint that processes each discovered document through the same civic pipeline used by manual uploads. Key additions: `feeds`, `feed_poll_runs`, and `feed_poll_run_items` tables (migration 005), three fetcher modules, SSRF protection, cost controls (daily budget of 50 documents, conditional HTTP, auto-disable at 5 consecutive failures), and email alerts via Resend. The shared `processCivicDocument()` function in `src/lib/pipeline.ts` unified manual and automated ingestion.
+
+**C8: Community Verification UI (PR #29, merged March 20, 2026)**
+
+The demo showed AI verification scores but had no way for humans to provide feedback. C8 added a `FeedbackSection` component with structured feedback categories (factual_error, missing_info, translation_error, misleading, outdated), Google OAuth for accountability, mobile-responsive bottom sheet form, and automatic re-verification triggers (2+ factual error flags re-run the LLM-as-Judge; 2+ translation flags re-trigger translation). The `community_feedback` table, auth callback route, and i18n strings for English, Spanish, and Hindi were all part of this feature.
+
 ## Technical Decisions
 
 **Next.js 16 over 14.** The CLAUDE.md originally specified Next.js 14. We ended up on 16.1.6 because that is what `npm install next@latest` gives you in March 2026. This was the right call (Turbopack is default, React 19 concurrent features are stable), but it introduced migration pain. See "Things That Broke" below.
