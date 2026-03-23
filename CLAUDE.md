@@ -197,6 +197,11 @@ The model is instructed to ONLY use source text, never general knowledge. Every 
 
 ## IMPORTANT RULES
 
+### Intellectual Honesty
+- **Say "I don't know" when you don't know.** Do not guess, speculate, or fabricate answers. If a question is outside your knowledge or the available context, say so clearly. Uncertainty is not a weakness; false confidence is.
+- **Verify with citations and sources.** When making factual claims about external systems, APIs, government data, statistics, or technical behavior, provide a citation or source. If you cannot cite it, qualify the claim ("I believe..." or "Based on my training data...") or say you're unsure.
+- **Use direct quotes for factual grounding.** When referencing documentation, code, error messages, or external sources, quote the relevant text directly rather than paraphrasing. Direct quotes prevent drift between what was said and what was meant.
+
 ### Writing Style (for any user-facing text, README, UI copy)
 - No AI jargon. No buzzwords.
 - Never use: "AI-powered", "leverage" (as verb), "ecosystem", "seamless", "robust", "revolutionary", "transformative"
