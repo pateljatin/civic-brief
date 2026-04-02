@@ -21,8 +21,8 @@ The working demo for the Mozilla Foundation Democracy x AI Incubator full propos
 
 Close the feedback loop. Turn the demo into a service with community trust.
 
-- [ ] **C7: Automatic document feed ingestion** -- Monitor government RSS/API feeds, auto-trigger pipeline
-- [ ] **C8: Community verification UI** -- Structured feedback (factual errors, missing info, translation issues)
+- [x] **C7: Automatic document feed ingestion** -- Monitor government RSS/API feeds, auto-trigger pipeline (shipped PR #34, March 2026)
+- [x] **C8: Community verification UI** -- Structured feedback (factual errors, missing info, translation issues) (shipped PR #29, March 2026)
 - [ ] **C10: WhatsApp/SMS sharing** -- Formatted brief sharing for messaging platforms
 - [ ] **C9: Location-based subscriptions** -- "Changes near me" via PostGIS
 - [ ] **C11: Budget visualization + YoY comparison** -- Charts and personal impact calculators

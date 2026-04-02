@@ -197,6 +197,11 @@ The model is instructed to ONLY use source text, never general knowledge. Every 
 
 ## IMPORTANT RULES
 
+### Intellectual Honesty
+- **Say "I don't know" when you don't know.** Do not guess, speculate, or fabricate answers. If a question is outside your knowledge or the available context, say so clearly. Uncertainty is not a weakness; false confidence is.
+- **Verify with citations and sources.** When making factual claims about external systems, APIs, government data, statistics, or technical behavior, provide a citation or source. If you cannot cite it, qualify the claim ("I believe..." or "Based on my training data...") or say you're unsure.
+- **Use direct quotes for factual grounding.** When referencing documentation, code, error messages, or external sources, quote the relevant text directly rather than paraphrasing. Direct quotes prevent drift between what was said and what was meant.
+
 ### Writing Style (for any user-facing text, README, UI copy)
 - No AI jargon. No buzzwords.
 - Never use: "AI-powered", "leverage" (as verb), "ecosystem", "seamless", "robust", "revolutionary", "transformative"
@@ -228,7 +233,7 @@ When NOT to use Superpowers (provide reasoning if skipping):
 - Pure research or exploration tasks
 - Documentation-only changes with no code impact
 
-### Spec Writing Rules (learned from C8 retro)
+### Spec Writing Rules (learned from C8 + C7 retros)
 These rules apply to every design spec and implementation plan:
 - **Render tree audit**: After drafting "Files Changed," walk the render tree of every affected page. Any component that renders user-visible text is in scope.
 - **State machine tables**: Conditional rendering flows get a `(state, condition) -> rendered output` table. Never describe rendering logic in prose only.
@@ -238,6 +243,11 @@ These rules apply to every design spec and implementation plan:
 - **i18n requirements must be specific**: List (a) every string to translate, (b) where translations live, (c) which components need a `lang` prop. "Must translate" without this detail is incomplete.
 - **Concurrent request scenarios**: Any write-path spec must describe what happens with two simultaneous identical requests.
 - **Deploy environment checklist**: Specs involving OAuth or external APIs must list all origins (production, staging, localhost) and required configuration per environment.
+- **Platform API contracts**: When a spec depends on a platform behavior (Vercel cron auth, Supabase RLS, etc.), quote the exact API contract and link to the docs page. Do not describe from memory.
+- **Deployment config per route**: Every new API route spec must include: maxDuration, memory, concurrency limits, and whether it needs Fluid Compute.
+- **Env var lifecycle table**: New env vars get a row in the plan's verification table with: name, where to set (local, Vercel production, Vercel preview), and who/what provisions it.
+- **Review checkpoint budget**: Plans with 10+ implementation commits should budget one "address review findings" commit. This is expected hygiene, not unplanned work.
+- **Structural clone consolidation**: When 2+ tasks are structural clones (same interface, same test pattern, different data source), note in the plan that they may ship as one commit.
 - **Planning retrospective**: After merging, write a retro in `docs/superpowers/retros/` documenting planned vs actual, categorizing every unplanned addition, and extracting rules. See `2026-03-20-c8-community-verification.md` for the template.
 
 ### Supabase Patterns (include in every spec touching DB)

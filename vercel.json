@@ -2,7 +2,8 @@
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/ingest", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/digest", "schedule": "0 9 * * 1" }
+    { "path": "/api/cron/digest", "schedule": "0 9 * * 1" },
+    { "path": "/api/cron/keepalive", "schedule": "0 12 */3 * *" }
   ],
   "functions": {
     "src/app/api/summarize/route.ts": {
