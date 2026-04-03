@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { scenarios, getScenarioBySlug } from '@/lib/showcase';
 
-const REQUIRED_SLUGS = ['budget', 'school-board', 'zoning', 'legislation', 'health-insurance'] as const;
+const REQUIRED_SLUGS = ['budget', 'school-board', 'zoning', 'legislation', 'drug-pricing'] as const;
 
 describe('showcase scenarios', () => {
   it('exports exactly 5 scenarios', () => {
@@ -79,6 +79,6 @@ describe('getScenarioBySlug', () => {
     expect(result.title).toBe('Budget Season');
     expect(result.icon).toBe('💰');
     expect(result.color).toBe('#1a2332');
-    expect(result.jurisdiction).toContain('Seattle');
+    expect(result.jurisdiction).toContain('Philadelphia');
   });
 });

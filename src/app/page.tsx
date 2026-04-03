@@ -247,6 +247,32 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* SHOWCASE CTA */}
+      <section style={{
+        textAlign: 'center',
+        padding: '48px 24px',
+      }}>
+        <a
+          href="/showcase"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '14px 32px',
+            borderRadius: '12px',
+            background: 'var(--civic)',
+            color: 'white',
+            fontSize: '16px',
+            fontWeight: 600,
+            fontFamily: "'Outfit', sans-serif",
+            textDecoration: 'none',
+            transition: 'transform 200ms ease-out, box-shadow 200ms ease-out',
+          }}
+        >
+          See it in action
+        </a>
+      </section>
+
       {/* VERIFICATION */}
       <div className="l-verify-wrap">
         <section className="l-verify reveal" ref={addRevealRef}>

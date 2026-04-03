@@ -50,3 +50,4 @@ docs/research/private/
 *.log
 npm-debug.log*
 .vercel
+tmp/
