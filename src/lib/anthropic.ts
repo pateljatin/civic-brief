@@ -52,7 +52,17 @@ export async function generateJSON<T>(
   try {
     return JSON.parse(jsonText) as T;
   } catch (parseError) {
+    // Try extracting the outermost JSON object as fallback
+    const objMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+      try {
+        return JSON.parse(objMatch[0]) as T;
+      } catch {
+        // Fall through to error
+      }
+    }
     console.error('JSON parse failed. Raw response (first 500 chars):', jsonText.slice(0, 500));
+    console.error('Last 200 chars:', jsonText.slice(-200));
     console.error('Response length:', jsonText.length, 'stop_reason:', response.stop_reason);
     throw new Error(
       response.stop_reason === 'max_tokens'
