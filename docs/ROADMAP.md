@@ -17,9 +17,9 @@ The working demo for the Mozilla Foundation Democracy x AI Incubator full propos
 - [x] Google OAuth with usage tracking
 - [x] Privacy by design: documents processed in memory, never stored
 
-## Phase 2: Trust Loop (mid-June 2026)
+## Phase 2: Trust Loop (June 2026)
 
-Close the feedback loop. Turn the demo into a trusted civic service. Aligns with Mozilla Incubator selection (mid-June 2026).
+Close the feedback loop. Turn the demo into a trusted civic service.
 
 - [x] **C7: Automatic document feed ingestion** -- Monitor government RSS/API feeds, auto-trigger pipeline (shipped PR #34, March 2026)
 - [x] **C8: Community verification UI** -- Structured feedback (factual errors, missing info, translation issues) (shipped PR #29, March 2026)
@@ -60,9 +60,9 @@ Multi-jurisdiction, multi-language, community-sustained platform.
 
 | Milestone | Target | Description |
 |-----------|--------|-------------|
-| Demo v1 | April 15, 2026 | Working demo for Mozilla full proposal (COMPLETE) |
-| v1.1 Trust Loop | mid-June 2026 | PostGIS tagging, user dashboard. Aligns with Mozilla selection. |
-| v1.2 Subscriptions | September 2026 | Location alerts, sharing, notifications. Aligned to Nov election cycle. |
+| Demo v1 | April 2026 | Working demo with civic summarization pipeline (COMPLETE) |
+| v1.1 Trust Loop | June 2026 | PostGIS tagging, user dashboard, community trust |
+| v1.2 Subscriptions | September 2026 | Location alerts, sharing, notifications |
 | v2.0 Scale | March 2027 | International expansion, semantic search |
 
 ## How to contribute
