@@ -4,10 +4,14 @@
 [![Mozilla Incubator](https://img.shields.io/badge/Mozilla-Democracy%20x%20AI-ff6611.svg)](https://foundation.mozilla.org)
 [![Built with Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-71%20passing-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
+[![Tests](https://img.shields.io/badge/Tests-270%20passing-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
+[![E2E](https://img.shields.io/badge/E2E-84%20tests-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
+[![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-blue.svg)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pateljatin/civic-brief/pulls)
 
 **Plain language for public power.**
+
+**See it live:** [civic-brief.vercel.app](https://civic-brief.vercel.app/) | [Five real government documents, summarized](https://civic-brief.vercel.app/showcase)
 
 An open-source platform that turns government budgets, legislation, and policy documents into plain-language civic intelligence, in the languages communities actually speak.
 
@@ -140,8 +144,8 @@ npm run build
 
 ## Testing
 
-- **71 unit tests** covering components, PDF extraction, prompts, security, types, and auth
-- **48 E2E tests** (24 specs across desktop and mobile viewports) covering page loads, navigation, form behavior, accessibility (WCAG 2.1 AA via axe-core), security headers, and mobile responsiveness
+- **270 unit and integration tests** covering components, PDF extraction, prompts, security, types, auth, feed ingestion, pipeline, email alerts, and community feedback
+- **84 E2E tests** (42 specs across desktop and mobile viewports) covering page loads, navigation, form behavior, showcase scenarios, accessibility (WCAG 2.1 AA via axe-core), security headers, and mobile responsiveness
 - Accessibility scans on every page using axe-core
 - Security header verification in E2E
 - CI pipeline runs all checks on every PR (see `.github/workflows/ci.yml`)
@@ -156,6 +160,8 @@ src/
     api/verify/           # Re-run factuality verification
     brief/[id]/           # Shareable civic brief page
     upload/               # Document upload interface
+    showcase/             # Five real government document scenarios
+    showcase/[scenario]/  # Individual scenario detail pages
     landing/              # Landing page
   lib/                    # Core libraries
     anthropic.ts          # Claude API client
@@ -178,6 +184,20 @@ supabase/
   seed/                   # Demo data (jurisdictions, topics, languages)
 ```
 
+## Showcase
+
+Five real government documents from across the US, processed through the full pipeline and live on the site. Each demonstrates a different type of civic document that affects people's daily lives.
+
+| Document | Jurisdiction | What it covers |
+|----------|-------------|----------------|
+| [Philadelphia FY2026 Budget in Brief](https://civic-brief.vercel.app/showcase/budget) | Philadelphia, PA | A $6.7 billion city budget with tax cuts, 30,000 housing units, and a $421 million projected deficit |
+| [APS 2040 Facility Recommendations](https://civic-brief.vercel.app/showcase/school-board) | Atlanta, GA | A unanimous vote to close 16 schools serving 50,000 students across 70,000 seats |
+| [City of Yes for Housing Opportunity](https://civic-brief.vercel.app/showcase/zoning) | Brooklyn, New York City | NYC's most ambitious zoning reform in decades, with five of eight community boards voting against it |
+| [California SB 40: Insulin Cost-Sharing](https://civic-brief.vercel.app/showcase/legislation) | California | A $35 insulin copay cap affecting 3.2 million Californians with diabetes |
+| [CMS GUARD Model](https://civic-brief.vercel.app/showcase/drug-pricing) | US Federal | International reference pricing for Medicare drugs, with an open comment period |
+
+Browse them all at [civic-brief.vercel.app/showcase](https://civic-brief.vercel.app/showcase).
+
 ## Roadmap
 
 ### Demo (April 2026) -- Complete
@@ -189,8 +209,8 @@ supabase/
 - [x] Google OAuth with usage tracking
 
 ### Next: Trust Loop (June 2026)
-- [ ] Community verification UI
-- [ ] Automatic document feed ingestion
+- [x] Automatic document feed ingestion (RSS, Legistar, OpenStates)
+- [x] Community verification UI
 - [ ] WhatsApp/SMS sharing
 
 ### Later
@@ -202,7 +222,7 @@ See the [project board](https://github.com/pateljatin/civic-brief/projects) and 
 
 ## Status
 
-Working demo live at [civic-brief.vercel.app](https://civic-brief.vercel.app). [Mozilla Foundation Democracy x AI Incubator 2026](https://foundation.mozilla.org) applicant.
+Working demo live at [civic-brief.vercel.app](https://civic-brief.vercel.app) with five real government documents in the [showcase](https://civic-brief.vercel.app/showcase). [Mozilla Foundation Democracy x AI Incubator 2026](https://foundation.mozilla.org) applicant.
 
 ## Contributing
 
