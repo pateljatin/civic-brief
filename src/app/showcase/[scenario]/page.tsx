@@ -15,6 +15,11 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title: `${config.title} | Civic Brief Showcase`,
     description: config.narrative,
+    openGraph: {
+      title: `${config.title} | Civic Brief Showcase`,
+      description: config.narrative,
+      siteName: 'Civic Brief',
+    },
   };
 }
 
