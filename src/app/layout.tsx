@@ -4,6 +4,7 @@ import AuthButton from '@/components/AuthButton';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://civic-brief.vercel.app'),
   title: 'Civic Brief',
   description:
     'Your government, in your language, in plain language. Open-source civic intelligence for every community.',
@@ -12,6 +13,10 @@ export const metadata: Metadata = {
     description:
       'Government documents go in. Plain-language civic briefs come out. In the languages your community actually speaks.',
     type: 'website',
+    siteName: 'Civic Brief',
+  },
+  twitter: {
+    card: 'summary_large_image',
   },
 };
 

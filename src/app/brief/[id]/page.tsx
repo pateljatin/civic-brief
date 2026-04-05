@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent, FeedbackType } from '@/lib/types';
@@ -64,6 +65,56 @@ const MOCK_TRANSLATIONS: Record<string, { headline: string; content: CivicConten
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  if (id === 'demo' || id === 'test-id') {
+    return {
+      title: 'Demo Brief | Civic Brief',
+      description: MOCK_BRIEF.headline,
+      openGraph: {
+        title: `${MOCK_BRIEF.headline} | Civic Brief`,
+        description: MOCK_BRIEF.content.what_changed,
+      },
+    };
+  }
+
+  try {
+    const { getServerClient } = await import('@/lib/supabase');
+    const db = getServerClient();
+
+    const { data: brief } = await db
+      .from('briefs')
+      .select('headline, summary, content')
+      .eq('id', id)
+      .eq('is_published', true)
+      .maybeSingle();
+
+    if (brief) {
+      const headline = brief.headline || 'Civic Brief';
+      const description =
+        brief.summary ||
+        (brief.content as CivicContent)?.what_changed ||
+        'A civic brief summarizing a government document.';
+      return {
+        title: `${headline} | Civic Brief`,
+        description,
+        openGraph: {
+          title: `${headline} | Civic Brief`,
+          description,
+        },
+      };
+    }
+  } catch {
+    // Supabase not configured; fall through to defaults
+  }
+
+  return {
+    title: 'Civic Brief',
+    description: 'A civic brief summarizing a government document.',
+  };
 }
 
 async function getBrief(id: string) {
