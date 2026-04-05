@@ -2,6 +2,8 @@ import { scenarios } from '@/lib/showcase';
 import { getServerClient } from '@/lib/supabase';
 import ScenarioCard from '@/components/ScenarioCard';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Showcase | Civic Brief',
   description: 'Five real government documents, summarized for five communities.',
@@ -12,17 +14,21 @@ export default async function ShowcasePage() {
   let briefMap = new Map<string, { factuality_score: number }>();
 
   if (validBriefIds.length > 0) {
-    const supabase = getServerClient();
-    const { data } = await supabase
-      .from('briefs')
-      .select('id, source_id, sources(factuality_score)')
-      .in('id', validBriefIds);
+    try {
+      const supabase = getServerClient();
+      const { data } = await supabase
+        .from('briefs')
+        .select('id, source_id, sources(factuality_score)')
+        .in('id', validBriefIds);
 
-    if (data) {
-      for (const brief of data) {
-        const score = (brief as any).sources?.factuality_score ?? null;
-        briefMap.set(brief.id, { factuality_score: score });
+      if (data) {
+        for (const brief of data) {
+          const score = (brief as any).sources?.factuality_score ?? null;
+          briefMap.set(brief.id, { factuality_score: score });
+        }
       }
+    } catch {
+      // Supabase credentials not available (e.g. CI build); fall back to static config scores
     }
   }
 

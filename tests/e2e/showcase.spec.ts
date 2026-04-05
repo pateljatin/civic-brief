@@ -40,7 +40,7 @@ test.describe('Showcase grid page', () => {
 
   test('each card has correct link', async ({ page }) => {
     await page.goto('/showcase');
-    const expectedSlugs = ['budget', 'school-board', 'zoning', 'legislation', 'health-insurance'];
+    const expectedSlugs = ['budget', 'school-board', 'zoning', 'legislation', 'drug-pricing'];
     for (const slug of expectedSlugs) {
       await expect(page.locator(`a[href="/showcase/${slug}"]`)).toBeVisible();
     }
@@ -49,11 +49,10 @@ test.describe('Showcase grid page', () => {
   test('cards show titles', async ({ page }) => {
     await page.goto('/showcase');
     await expect(page.getByText('Budget Season')).toBeVisible();
-    await expect(page.getByText('School Board')).toBeVisible();
+    await expect(page.getByText('School Closures')).toBeVisible();
     await expect(page.getByText('Zoning Change')).toBeVisible();
-    await expect(page.getByText('State Legislation')).toBeVisible();
-    // Title is "Health Insurance & Rx Costs" — match partially to avoid special-char fragility
-    await expect(page.getByText(/Health Insurance/)).toBeVisible();
+    await expect(page.getByText('Insulin Costs')).toBeVisible();
+    await expect(page.getByText(/Medicare Drug Pricing/)).toBeVisible();
   });
 
   test('passes accessibility checks', async ({ page }) => {
