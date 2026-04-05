@@ -42,7 +42,7 @@ export default async function ShowcasePage() {
     >
       <h1
         style={{
-          fontFamily: 'var(--font-fraunces, serif)',
+          fontFamily: "'Fraunces', serif",
           fontWeight: 800,
           fontSize: 'clamp(30px, 4vw, 44px)',
           textAlign: 'center',
@@ -53,7 +53,7 @@ export default async function ShowcasePage() {
       </h1>
       <p
         style={{
-          fontFamily: 'var(--font-outfit, sans-serif)',
+          fontFamily: "'Outfit', sans-serif",
           fontWeight: 300,
           fontSize: '17px',
           color: 'var(--muted)',

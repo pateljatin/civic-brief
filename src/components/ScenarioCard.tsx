@@ -37,16 +37,16 @@ export default function ScenarioCard({ scenario, confidence, index }: ScenarioCa
   };
 
   const titleStyle: React.CSSProperties = {
-    fontFamily: 'var(--font-fraunces, serif)',
+    fontFamily: "'Fraunces', serif",
     fontWeight: 700,
     fontSize: '17px',
-    color: '#fff',
+    color: 'var(--ink)',
     margin: 0,
   };
 
   const bodyTextStyle: React.CSSProperties = {
     fontSize: '14px',
-    color: '#ccc',
+    color: 'var(--muted)',
     lineHeight: 1.5,
     margin: 0,
   };
@@ -61,8 +61,8 @@ export default function ScenarioCard({ scenario, confidence, index }: ScenarioCa
 
   const jurisdictionBadgeStyle: React.CSSProperties = {
     fontSize: '11px',
-    color: '#888',
-    border: '1px solid #444',
+    color: 'var(--muted)',
+    border: '1px solid var(--border)',
     borderRadius: '4px',
     padding: '2px 7px',
     lineHeight: 1.6,
@@ -71,8 +71,8 @@ export default function ScenarioCard({ scenario, confidence, index }: ScenarioCa
   const cardInnerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'row',
-    background: '#16161a',
-    border: '1px solid #2a2a2e',
+    background: 'var(--paper)',
+    border: '1px solid var(--border)',
     borderRadius: '10px',
     overflow: 'hidden',
     textDecoration: 'none',
@@ -112,7 +112,7 @@ export default function ScenarioCard({ scenario, confidence, index }: ScenarioCa
 
         <span
           className="scenario-card-arrow"
-          style={{ color: '#444', fontSize: '22px', alignSelf: 'center', paddingRight: '16px' }}
+          style={{ color: 'var(--muted)', fontSize: '22px', alignSelf: 'center', paddingRight: '16px' }}
           aria-hidden="true"
         >
           →
