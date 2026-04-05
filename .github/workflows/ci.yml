@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      HAS_SUPABASE: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
 
     steps:
       - name: Checkout
@@ -38,11 +40,11 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Install Playwright browsers
-        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+        if: env.HAS_SUPABASE != ''
         run: npx playwright install --with-deps chromium
 
       - name: E2E tests
-        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+        if: env.HAS_SUPABASE != ''
         run: npx playwright test
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -51,7 +53,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: E2E tests skipped
-        if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL == '' }}
+        if: env.HAS_SUPABASE == ''
         run: echo "Skipping E2E tests -- Supabase credentials not configured"
 
       - name: Upload Playwright report
