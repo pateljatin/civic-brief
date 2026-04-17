@@ -26,6 +26,7 @@ interface CivicBriefProps {
   userFeedback?: FeedbackType;
   isSignedIn?: boolean;
   isDemo?: boolean;
+  generatedAt?: string;
 }
 
 interface BriefSectionProps {
@@ -92,11 +93,13 @@ export default function CivicBrief({
   userFeedback,
   isSignedIn = false,
   isDemo = false,
+  generatedAt,
 }: CivicBriefProps) {
   const [showVerification, setShowVerification] = useState(false);
   const [activeLang, setActiveLang] = useState(currentLanguage);
   const [translations, setTranslations] = useState(initialTranslations || {});
   const [translating, setTranslating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // All supported languages for non-demo briefs
   const displayLanguages = isDemo
@@ -141,6 +144,24 @@ export default function CivicBrief({
       setTranslating(false);
     }
   };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API not available (e.g., non-secure context)
+    }
+  };
+
+  const formattedDate = generatedAt
+    ? new Date(generatedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
 
   // Use translated content if available
   const activeContent =
@@ -348,6 +369,37 @@ export default function CivicBrief({
         }}
       >
         <SourceLink url={sourceUrl} title={sourceTitle} isDemo={isDemo} lang={activeLang} />
+        <button
+          onClick={handleCopyLink}
+          aria-label="Copy link to this brief"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            border: '1px solid var(--border, #e2ddd4)',
+            background: copied ? 'var(--green-light, #e9f5ec)' : 'white',
+            color: copied ? 'var(--green, #2d6a4f)' : 'var(--muted, #8a8a92)',
+            fontSize: '13px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            transition: 'background 0.15s, color 0.15s',
+          }}
+        >
+          {copied ? '✓ Copied!' : '🔗 Copy link'}
+        </button>
+        {formattedDate && (
+          <span
+            style={{
+              fontSize: '12px',
+              color: 'var(--muted, #8a8a92)',
+              marginLeft: 'auto',
+            }}
+          >
+            Summarized {formattedDate}
+          </span>
+        )}
       </div>
 
       {/* Community Feedback */}
