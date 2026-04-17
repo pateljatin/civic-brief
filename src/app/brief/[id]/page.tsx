@@ -310,6 +310,7 @@ export default async function BriefPage({ params }: PageProps) {
         helpfulCount={feedbackData.helpfulCount}
         userFeedback={feedbackData.userFeedback}
         isSignedIn={feedbackData.isSignedIn}
+        generatedAt={briefData.created_at}
       />
     </div>
   );

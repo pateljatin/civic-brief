@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ConfidenceScore from '@/components/ConfidenceScore';
 import SourceLink from '@/components/SourceLink';
 import LanguageToggle from '@/components/LanguageToggle';
+import CivicBrief from '@/components/CivicBrief';
+import type { CivicContent } from '@/lib/types';
 
 describe('ConfidenceScore', () => {
   it('renders high confidence correctly', () => {
@@ -158,5 +160,108 @@ describe('LanguageToggle', () => {
     expect(screen.queryByText('Hindi')).not.toBeInTheDocument();
     expect(screen.getByText('English')).toBeInTheDocument();
     expect(screen.getByText('Espanol')).toBeInTheDocument();
+  });
+});
+
+// Shared minimal CivicBrief props for unit tests
+const MINIMAL_CONTENT: CivicContent = {
+  title: 'Test',
+  what_changed: 'Something changed.',
+  who_affected: 'Residents.',
+  what_to_do: 'Attend the meeting.',
+  money: null,
+  deadlines: [],
+  context: '',
+  key_quotes: [],
+  document_type: 'resolution',
+};
+
+const MINIMAL_BRIEF_PROPS = {
+  headline: 'Test Headline',
+  content: MINIMAL_CONTENT,
+  sourceUrl: 'https://example.gov/doc.pdf',
+  confidenceScore: 0.88,
+  confidenceLevel: 'high' as const,
+  currentLanguage: 'en',
+  availableLanguages: ['en'],
+};
+
+describe('CivicBrief — copy link button', () => {
+  beforeEach(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(window, 'location', {
+      value: { href: 'https://civic-brief.vercel.app/brief/abc-123' },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it('renders the copy link button', () => {
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} />);
+    expect(screen.getByRole('button', { name: /copy link/i })).toBeInTheDocument();
+  });
+
+  it('shows "Copied!" feedback after clicking', async () => {
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} />);
+    const btn = screen.getByRole('button', { name: /copy link/i });
+    fireEvent.click(btn);
+    await waitFor(() => {
+      expect(screen.getByText(/Copied!/i)).toBeInTheDocument();
+    });
+  });
+
+  it('calls clipboard.writeText with the current URL', async () => {
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} />);
+    const btn = screen.getByRole('button', { name: /copy link/i });
+    fireEvent.click(btn);
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        'https://civic-brief.vercel.app/brief/abc-123'
+      );
+    });
+  });
+
+  it('reverts to "Copy link" after 2 seconds', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} />);
+    const btn = screen.getByRole('button', { name: /copy link/i });
+    fireEvent.click(btn);
+    // Wait for the clipboard promise to resolve and state to update
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText(/Copied!/i)).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText(/Copy link/i)).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+});
+
+describe('CivicBrief — last updated timestamp', () => {
+  it('shows formatted date when generatedAt is provided', () => {
+    render(
+      <CivicBrief
+        {...MINIMAL_BRIEF_PROPS}
+        generatedAt="2026-04-14T10:30:00Z"
+      />
+    );
+    expect(screen.getByText(/Summarized/)).toBeInTheDocument();
+    expect(screen.getByText(/April 14, 2026/)).toBeInTheDocument();
+  });
+
+  it('hides the timestamp when generatedAt is not provided', () => {
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} />);
+    expect(screen.queryByText(/Summarized/)).not.toBeInTheDocument();
+  });
+
+  it('hides the timestamp when generatedAt is undefined', () => {
+    render(<CivicBrief {...MINIMAL_BRIEF_PROPS} generatedAt={undefined} />);
+    expect(screen.queryByText(/Summarized/)).not.toBeInTheDocument();
   });
 });
