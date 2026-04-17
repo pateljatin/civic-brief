@@ -36,7 +36,32 @@ export interface Jurisdiction {
   valid_from: string | null;
   valid_until: string | null;
   successor_id: string | null;
+  centroid?: unknown;
+  boundary?: unknown;
+  boundary_simplified?: unknown;
   created_at: string;
+}
+
+export interface BriefJurisdiction {
+  id: string;
+  brief_id: string;
+  jurisdiction_id: string;
+  relationship: 'direct' | 'ancestor' | 'mentioned' | 'community';
+  confidence: number;
+  assigned_by: 'ai' | 'manual' | 'feed' | 'community';
+  created_at: string;
+}
+
+export interface LocationSearchResult {
+  jurisdiction: Jurisdiction;
+  hierarchy: { name: string; level_name: string; depth: number }[];
+  brief_count: number;
+  similarity: number;
+}
+
+export interface LocationSearchRequest {
+  q: string;
+  limit?: number;
 }
 
 export interface Language {
