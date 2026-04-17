@@ -70,6 +70,7 @@ export default function SourceLink({ url, title, isDemo = false, lang = 'en' }: 
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={label}
       style={{
         ...baseStyle,
         background: 'white',

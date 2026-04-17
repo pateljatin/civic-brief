@@ -45,6 +45,7 @@ export default function ConfidenceScore({ score, level, lang = 'en' }: Confidenc
       }}
     >
       <span
+        aria-hidden="true"
         style={{
           width: '8px',
           height: '8px',
