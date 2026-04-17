@@ -47,7 +47,7 @@ After extraction, we compute a SHA-256 hash of the text for deduplication. If th
 
 **Step 4: Civic summarization (server side, `src/lib/anthropic.ts` + `src/lib/prompts/civic-summarize.ts`)**
 
-The extracted text is sent to Claude (`claude-sonnet-4-20250514`, pinned) with a civic-context system prompt. The prompt is the heart of what makes this different from ChatGPT. It instructs the model to produce structured JSON answering six civic questions:
+The extracted text is sent to Claude (`claude-sonnet-4-6`, pinned) with a civic-context system prompt. The prompt is the heart of what makes this different from ChatGPT. It instructs the model to produce structured JSON answering six civic questions:
 
 1. **What changed?** The specific action, decision, or policy change.
 2. **Who is affected?** Which residents, businesses, or groups.
@@ -248,7 +248,7 @@ Key learnings:
 
 ### Claude API (Anthropic SDK)
 
-We use the official `@anthropic-ai/sdk` package. The client is a singleton initialized on first use. The model is pinned to `claude-sonnet-4-20250514` so behavior does not change when Anthropic releases new versions.
+We use the official `@anthropic-ai/sdk` package. The client is a singleton initialized on first use. The model is pinned to `claude-sonnet-4-6` so behavior does not change when Anthropic releases new versions.
 
 The `generateJSON<T>()` helper is the core abstraction. It takes a system prompt and user message, calls `messages.create()`, finds the text block in the response, strips markdown code fences (Claude sometimes wraps JSON in ```json ... ```), and parses it into the generic type T. This one function serves summarization, verification, and translation.
 

@@ -4,7 +4,7 @@ import type { PipelineParams, PipelineResult } from '@/lib/pipeline';
 // Mock all external dependencies
 vi.mock('@/lib/anthropic', () => ({
   generateJSON: vi.fn(),
-  MODEL: 'claude-sonnet-4-20250514',
+  MODEL: 'claude-sonnet-4-6',
   PROMPT_VERSION: 'civic-v1.0',
 }));
 

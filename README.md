@@ -99,7 +99,7 @@ Every claim is sourced from the document. The model is explicitly instructed to 
 | Framework | Next.js 16 (App Router) | Server components, API routes, Turbopack |
 | Language | TypeScript (strict) | Type safety across the full stack |
 | Database | Supabase (Postgres + PostGIS) | Global jurisdiction model with spatial queries |
-| AI | Claude API (claude-sonnet-4-20250514) | Civic-context summarization, verification, translation |
+| AI | Claude API (claude-sonnet-4-6) | Civic-context summarization, verification, translation |
 | PDF | unpdf | In-memory extraction, no system dependencies |
 | Testing | Vitest + Playwright + axe-core | Unit, E2E, and WCAG 2.1 AA accessibility |
 | Hosting | Vercel | Auto-deploy, edge network, analytics |

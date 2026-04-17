@@ -39,7 +39,7 @@ A user uploads a government PDF (budget, resolution, policy document). The syste
 - **Language:** TypeScript (strict mode)
 - **Runtime:** React 19.2.4
 - **Database:** Supabase (Postgres + PostGIS + pg_trgm). No Auth, no Storage for demo.
-- **AI:** Claude API (Anthropic), model pinned to `claude-sonnet-4-20250514`, prompt version `civic-v1.0`
+- **AI:** Claude API (Anthropic), model pinned to `claude-sonnet-4-6`, prompt version `civic-v1.0`
 - **PDF:** unpdf (in-memory extraction, no disk writes)
 - **Testing:** Vitest (unit), Playwright + axe-core (E2E + accessibility)
 - **Hosting:** Vercel (auto-deploy from main)
