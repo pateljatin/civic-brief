@@ -38,7 +38,7 @@ All decisions were made during brainstorming on 2026-04-16.
 | 5 | Location page UI | Search + list, no map | Map is C23; a list view is sufficient for brief discovery and unblocks the subscription model |
 | 6 | Boundary data loading | Separate script, not a migration | Keeps Migration 009 small and fast; boundaries can be (re)loaded independently |
 | 7 | International boundaries | Deferred to C20 | geoBoundaries v6 (CC BY 4.0) is the correct source when we get there; GADM is non-commercial |
-| 8 | Simplified geometries for tiles | Deferred to C23 | `boundary_simplified` column added when map rendering is actually built |
+| 8 | Simplified geometries for tiles | Include in Migration 009 | `boundary_simplified` column added now; populated by `scripts/load-boundaries.ts` via `ST_SimplifyPreserveTopology(boundary, 0.01)` |
 | 9 | Address-level geocoding | Out of scope | Jurisdiction-level search is sufficient for brief discovery |
 
 ---
@@ -143,6 +143,10 @@ create table brief_jurisdictions (
 
 create index idx_brief_jurisdictions_jurisdiction on brief_jurisdictions(jurisdiction_id);
 create index idx_brief_jurisdictions_brief on brief_jurisdictions(brief_id);
+
+-- Add simplified boundary column to jurisdictions (for future map rendering, populated by load-boundaries.ts)
+alter table jurisdictions add column if not exists boundary_simplified geometry(MultiPolygon, 4326);
+create index if not exists jurisdictions_boundary_simplified_gist on jurisdictions using gist (boundary_simplified);
 ```
 
 **`relationship` values:**
@@ -157,9 +161,11 @@ create index idx_brief_jurisdictions_brief on brief_jurisdictions(brief_id);
 - `feed` -- Feed ingestion; jurisdiction comes from the feed row's `jurisdiction_id`.
 - `community` -- User correction via the community feedback UI.
 
+**Migration 009 also adds:**
+- `boundary_simplified geometry(MultiPolygon, 4326)` column on `jurisdictions` with GiST index. Populated by `scripts/load-boundaries.ts` using `ST_SimplifyPreserveTopology(boundary, 0.01)`.
+
 **What Migration 009 does NOT include:**
-- Boundary geometry data (loaded by `scripts/load-boundaries.ts` separately).
-- `boundary_simplified` column (deferred to C23).
+- Boundary geometry data itself (loaded by `scripts/load-boundaries.ts` separately).
 
 ### Updated function: briefs_for_location()
 
@@ -197,7 +203,7 @@ Not a migration. Run manually or in CI. Loads US Census TIGER/Line data into exi
 **Loading approach:**
 - Download shapefiles, convert to GeoJSON.
 - Match to existing `jurisdictions` rows via FIPS code or OCD-ID.
-- Update `boundary = ST_GeomFromGeoJSON(...)` and `centroid = ST_Centroid(boundary)`.
+- Update `boundary = ST_GeomFromGeoJSON(...)`, `centroid = ST_Centroid(boundary)`, and `boundary_simplified = ST_SimplifyPreserveTopology(boundary, 0.01)`.
 - Use Supabase client with service role key.
 
 **International (deferred to C20):**
@@ -325,51 +331,72 @@ limit $2;
 
 ## 7. New Page: /location
 
+This is the front door to location-aware civic intelligence. Not a utility search box. It should feel as confident and purposeful as the homepage and showcase pages.
+
 ### Route
 
-`src/app/location/page.tsx` -- server component for initial render, client component for search interaction.
+`src/app/location/page.tsx` -- client component for interactive search.
 
-### Component states
+### Design System Alignment
 
-| State | What renders |
-|-------|-------------|
-| Default | Search box with placeholder "Search by city, county, or state..." No results shown. |
-| Loading | Spinner below search box. Search box remains active. |
-| Results (disambiguation) | List of jurisdiction matches, each showing full hierarchy breadcrumb (e.g., "Springfield / Sangamon County / Illinois"). Click to select. |
-| Results (briefs list) | Selected jurisdiction name + hierarchy breadcrumb at top. Briefs grouped by jurisdiction level (Federal, State, County, City). Each brief shows title, date, confidence score, language badges. |
-| Empty | "No briefs found for [Jurisdiction Name]. Be the first to upload a document." with a link to /upload. |
-| Error | "Search failed. Please try again." with a retry button. |
+- Fonts: Fraunces (headings), Outfit (body) -- same as all pages
+- Colors: `var(--ink)`, `var(--paper)`, `var(--warm)`, `var(--accent)`, `var(--civic)`, `var(--muted)`, `var(--border)`, `var(--green)` -- existing palette only
+- Spacing: `container-narrow` (720px max-width) for the search hero, `container` (1280px) if results need more room
+- Animations: reuse existing `fadeUp` keyframe, stagger 50ms per card, respect `prefers-reduced-motion`
+- Mobile: full-width search, stacked cards, sticky level group headers
 
-### Results display (briefs list)
+### Component States
 
-When a jurisdiction is selected:
+**1. Default (landing state)**
+- Full-width hero section, centered
+- Fraunces heading: "What's happening in your community?"
+- Outfit subtext: "Search by city, county, or state to find civic briefs from every level of government that affects you."
+- Large search input: 48px height, 16px font, `var(--border)` border, `var(--accent)` focus ring (2px), white background, 12px border-radius. Placeholder: "Seattle, King County, Washington..."
+- Below search: three "quick pick" jurisdiction pills for our most-populated seeded jurisdictions as discovery shortcuts. Rounded pill buttons with `var(--warm)` bg, `var(--border)` border, hover to `var(--civic-light)` with `var(--civic)` text.
+- Below that: muted stat line: "Covering X jurisdictions across Y states"
 
-```
-[Jurisdiction breadcrumb: City of Seattle / King County / Washington]
+**2. Searching (typing state, debounced 300ms)**
+- Results appear in a dropdown below the input (max 8 rows)
+- Each row: jurisdiction name, level badge, hierarchy breadcrumb in muted text, brief count
+- Level badges are pill-shaped, colored by level:
+  - Federal: `var(--ink)` bg, white text
+  - State: `var(--civic)` bg, white text
+  - County: `var(--accent)` bg, white text
+  - City: `var(--green)` bg, white text
+- Results ranked by `similarity()` weighted by population
+- Fuzzy near-miss: "Did you mean...?" row if no exact match but fuzzy matches exist
+- No results: "No jurisdictions found. Try a different name." in the dropdown
 
-Federal (2 briefs)
-  -- [Brief card]
-  -- [Brief card]
+**3. Results (jurisdiction selected)**
+- Search box stays at top (collapsed, showing selected jurisdiction name with an X button to clear and return to default)
+- Hierarchy breadcrumb bar below search: `United States > Washington > King County > Seattle` -- `>` separator, muted text, each ancestor clickable to switch scope, active item in `var(--ink)` bold
+- Briefs grouped by jurisdiction level, each group with a collapsible header:
+  - Federal (collapsed by default, applies everywhere)
+  - State: Washington
+  - County: King County
+  - City: Seattle (expanded by default, most specific)
+- Each brief card: white bg, 1px `var(--border)`, 12px radius, hover lift (same as showcase `.scenario-card-link` pattern). Contains: document type icon badge (from #44), headline in Fraunces 16px weight 700, one-line summary in Outfit 14px, confidence dot, date.
+- Empty groups do not render at all (no "0 briefs" placeholders)
+- Brief cards stagger with `fadeUp` animation, 50ms delay per card
 
-Washington (5 briefs)
-  -- [Brief card]
-  -- ...
+**4. Empty (jurisdiction exists, zero briefs from any level)**
+- Selected jurisdiction shown with hierarchy breadcrumb
+- Centered empty state with civic-themed CSS illustration (no images)
+- "No civic briefs for [Jurisdiction Name] yet."
+- "Be the first to contribute." with prominent accent-colored link to `/upload`
+- If ancestor jurisdictions have briefs, show a "Briefs from parent jurisdictions" section below
 
-King County (3 briefs)
-  -- ...
-
-City of Seattle (12 briefs)
-  -- ...
-```
-
-Briefs within each group sort by `created_at DESC`. Groups only render if they have at least one brief.
+**5. Error**
+- Inline error banner below search: `#fee2e2` background, `#dc2626` text, clear message
+- Search box stays interactive, user can retry immediately
 
 ### Accessibility
 
-- Search input has a visible label.
-- Jurisdiction results are a `<ul>` with `role="listbox"` for autocomplete semantics.
-- Briefs list uses `<section>` per jurisdiction group with a heading.
-- axe-core scan required in E2E tests (same as all other pages).
+- Search input has a visible `<label>` (visually styled as the heading acts as context, but the label is present for screen readers)
+- Jurisdiction dropdown results: `<ul>` with `role="listbox"`, each result is `role="option"`, keyboard navigable with ArrowUp/ArrowDown, Enter to select
+- Briefs list: `<section>` per jurisdiction group with an `<h2>` heading
+- Level badges have `aria-label` (e.g., "City" not just color)
+- axe-core scan required in E2E tests (WCAG 2.1 AA, same as all other pages)
 
 ---
 
@@ -430,6 +457,7 @@ export interface Jurisdiction {
 | `src/components/JurisdictionSearch.tsx` | New: autocomplete component backed by `/api/location` |
 | `tests/unit/pipeline.test.ts` | Tests for `tagBriefJurisdictions()` including ancestor expansion and conflict handling |
 | `tests/unit/domain-lookup.test.ts` | Tests for domain extraction and jurisdiction mapping |
+| `src/app/layout.tsx` | Add "Location" nav link between "Upload" and "Demo Brief" |
 | `tests/e2e/pages.spec.ts` | Add /location to page coverage: default, results, empty, error + axe scan |
 
 **Render tree audit:** `/location` renders `JurisdictionSearch` (search input + dropdown), a briefs list, and `ConfidenceScore` + `SourceLink` within each brief card. All of these are in scope. `LanguageToggle` is NOT rendered on `/location` (location search is language-neutral; briefs display in their stored language with language badges).
@@ -461,7 +489,7 @@ This design was reviewed against the roadmap. Here is how it supports future mil
 | C16: District-wide feed | Query all child jurisdictions via parent; all covered by `idx_brief_jurisdictions_jurisdiction` |
 | C19: Multi-jurisdiction dashboard | Heavy reads on `brief_jurisdictions` -- both indexes cover this |
 | C20: International expansion | Same schema; `scripts/load-boundaries.ts` gets a new data source (geoBoundaries v6) |
-| C23: Map visualization | Add `boundary_simplified` column then; boundary data already loaded |
+| C23: Map visualization | `boundary_simplified` column and data already exist; just add the map UI |
 | C26: Version history | Copy `brief_jurisdictions` rows when creating a new brief version |
 | C28: Trending | `COUNT(*)` recent rows per `jurisdiction_id` -- covered by `idx_brief_jurisdictions_jurisdiction` |
 
@@ -472,7 +500,7 @@ This design was reviewed against the roadmap. Here is how it supports future mil
 - Interactive map UI (C23)
 - Address-level geocoding (jurisdiction-level search is sufficient for brief discovery)
 - International boundary loading (C20)
-- Simplified boundary geometries for tile rendering (C23)
+- Interactive map rendering of boundary polygons (C23; the data and simplified column will exist)
 - Real-time notifications when new briefs match a jurisdiction (C12)
 - Property tax calculations (C15)
 - `mentioned` relationship type tagging via NER (reserved for future; column exists)
