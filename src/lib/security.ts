@@ -100,7 +100,42 @@ if (typeof setInterval !== 'undefined') {
 
 // ── Input Validation ──
 
-/** Validate a URL is well-formed and uses http(s). Rejects javascript: and data: URIs. */
+/**
+ * Returns true if a hostname string resolves to a private/loopback IP range.
+ * Guards against SSRF attacks that target internal infrastructure.
+ */
+function isPrivateHost(hostname: string): boolean {
+  // Strip IPv6 brackets
+  const host = hostname.replace(/^\[/, '').replace(/\]$/, '');
+
+  // Explicit loopback / wildcard
+  if (host === 'localhost' || host === '0.0.0.0') return true;
+
+  // IPv6 loopback
+  if (host === '::1') return true;
+
+  // IPv6 Unique Local (fc00::/7) — fc00:: through fdff::
+  if (/^f[cd][0-9a-f]{2}:/i.test(host)) return true;
+
+  // IPv6 link-local (fe80::/10)
+  if (/^fe[89ab][0-9a-f]:/i.test(host)) return true;
+
+  // IPv4 — parse octets
+  const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const [, a, b, c] = ipv4.map(Number);
+    if (a === 127) return true;          // 127.0.0.0/8  loopback
+    if (a === 10) return true;           // 10.0.0.0/8   private
+    if (a === 192 && b === 168) return true; // 192.168.0.0/16 private
+    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12 private
+    if (a === 169 && b === 254) return true; // 169.254.0.0/16 link-local (AWS metadata)
+  }
+
+  return false;
+}
+
+/** Validate a URL is well-formed and uses http(s). Rejects dangerous protocols,
+ *  embedded credentials, private/loopback hosts, and protocol-relative URLs. */
 export function validateUrl(url: string): { valid: boolean; error?: string } {
   if (!url || typeof url !== 'string') {
     return { valid: false, error: 'URL is required.' };
@@ -110,15 +145,33 @@ export function validateUrl(url: string): { valid: boolean; error?: string } {
     return { valid: false, error: 'URL is too long (max 2048 characters).' };
   }
 
+  // Reject protocol-relative URLs (//example.com) before URL() parses them
+  if (url.startsWith('//')) {
+    return { valid: false, error: 'URL must include a protocol (https://).' };
+  }
+
+  let parsed: URL;
   try {
-    const parsed = new URL(url);
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      return { valid: false, error: 'URL must use http or https protocol.' };
-    }
-    return { valid: true };
+    parsed = new URL(url);
   } catch {
     return { valid: false, error: 'Invalid URL format.' };
   }
+
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    return { valid: false, error: 'URL must use http or https protocol.' };
+  }
+
+  // Reject embedded credentials (user:pass@host) — they hide the real destination
+  if (parsed.username || parsed.password) {
+    return { valid: false, error: 'URL must not contain authentication credentials.' };
+  }
+
+  // Reject private/loopback hosts (SSRF protection)
+  if (isPrivateHost(parsed.hostname)) {
+    return { valid: false, error: 'URL must point to a public web address.' };
+  }
+
+  return { valid: true };
 }
 
 /** Validate file upload: type and size. */

@@ -42,6 +42,69 @@ describe('security', () => {
       expect(validateUrl('not-a-url').valid).toBe(false);
       expect(validateUrl('://missing-protocol').valid).toBe(false);
     });
+
+    it('rejects URLs with embedded authentication credentials', () => {
+      expect(validateUrl('https://user:pass@example.com/doc.pdf').valid).toBe(false);
+      expect(validateUrl('https://admin@example.com/doc.pdf').valid).toBe(false);
+    });
+
+    it('accepts URLs with fragments (hash)', () => {
+      // Fragments are client-side only but not inherently dangerous
+      expect(validateUrl('https://seattle.gov/budget.pdf#page=3').valid).toBe(true);
+    });
+
+    it('rejects double-encoded URLs that resolve to dangerous protocols', () => {
+      // %6a%61%76%61%73%63%72%69%70%74 = javascript, but URL constructor decodes it
+      expect(validateUrl('https://example.com/%2e%2e/etc/passwd').valid).toBe(true); // safe host
+      expect(validateUrl('javascript%3Aalert(1)').valid).toBe(false);
+    });
+
+    it('accepts URLs with unicode domains (IDN)', () => {
+      // Unicode hostnames are valid government domains in non-US jurisdictions
+      expect(validateUrl('https://example.com/path?q=ciudadanía').valid).toBe(true);
+    });
+
+    it('rejects extremely long URLs', () => {
+      const longUrl = 'https://example.com/?' + 'x=y&'.repeat(600);
+      expect(validateUrl(longUrl).valid).toBe(false);
+      expect(validateUrl(longUrl).error).toMatch(/too long/i);
+    });
+
+    it('accepts URLs with port numbers', () => {
+      expect(validateUrl('https://example.com:8443/doc.pdf').valid).toBe(true);
+      expect(validateUrl('http://example.com:8080/budget.pdf').valid).toBe(true);
+    });
+
+    it('rejects relative URLs', () => {
+      expect(validateUrl('/relative/path/doc.pdf').valid).toBe(false);
+      expect(validateUrl('./doc.pdf').valid).toBe(false);
+    });
+
+    it('rejects protocol-relative URLs (//example.com)', () => {
+      expect(validateUrl('//example.com/doc.pdf').valid).toBe(false);
+    });
+
+    it('rejects localhost and loopback addresses (SSRF protection)', () => {
+      expect(validateUrl('http://localhost/internal').valid).toBe(false);
+      expect(validateUrl('http://127.0.0.1/internal').valid).toBe(false);
+      expect(validateUrl('http://0.0.0.0/internal').valid).toBe(false);
+    });
+
+    it('rejects private IP ranges (SSRF protection)', () => {
+      expect(validateUrl('http://192.168.1.1/doc').valid).toBe(false);
+      expect(validateUrl('http://10.0.0.1/doc').valid).toBe(false);
+      expect(validateUrl('http://172.16.0.1/doc').valid).toBe(false);
+      expect(validateUrl('http://169.254.169.254/latest/meta-data/').valid).toBe(false); // AWS metadata
+    });
+
+    it('rejects IPv6 loopback and private addresses (SSRF protection)', () => {
+      expect(validateUrl('http://[::1]/internal').valid).toBe(false);
+      expect(validateUrl('http://[fc00::1]/internal').valid).toBe(false);
+    });
+
+    it('accepts public IPv6 addresses', () => {
+      expect(validateUrl('https://[2001:db8::1]/doc.pdf').valid).toBe(true);
+    });
   });
 
   describe('sanitizeText', () => {
