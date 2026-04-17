@@ -8,6 +8,50 @@ import SourceLink from './SourceLink';
 import LanguageToggle from './LanguageToggle';
 import FeedbackSection from './FeedbackSection';
 
+const DOCUMENT_TYPE_ICONS: Record<string, string> = {
+  budget: '💰',
+  legislation: '📜',
+  minutes: '📋',
+  ordinance: '⚖️',
+  resolution: '📄',
+  notice: '📢',
+  agenda: '📅',
+  report: '📊',
+  plan: '🗺️',
+  contract: '🤝',
+  policy: '📑',
+  other: '📄',
+};
+
+function getDocumentTypeIcon(documentType: string): string {
+  return DOCUMENT_TYPE_ICONS[documentType.toLowerCase()] ?? '📄';
+}
+
+function DocumentTypeBadge({ documentType }: { documentType: string }) {
+  const icon = getDocumentTypeIcon(documentType);
+  const label = documentType.charAt(0).toUpperCase() + documentType.slice(1);
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        fontSize: '12px',
+        fontWeight: 600,
+        color: 'var(--muted, #8a8a92)',
+        background: 'var(--warm, #f5f0e8)',
+        borderRadius: '6px',
+        padding: '3px 8px',
+        letterSpacing: '0.2px',
+      }}
+      aria-label={`Document type: ${label}`}
+    >
+      <span aria-hidden="true">{icon}</span>
+      {label}
+    </span>
+  );
+}
+
 interface CivicBriefProps {
   headline: string;
   content: CivicContent;
@@ -389,6 +433,9 @@ export default function CivicBrief({
         >
           {copied ? '✓ Copied!' : '🔗 Copy link'}
         </button>
+        {activeContent.document_type && (
+          <DocumentTypeBadge documentType={activeContent.document_type} />
+        )}
         {formattedDate && (
           <span
             style={{
