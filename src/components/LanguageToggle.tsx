@@ -1,5 +1,7 @@
 'use client';
 
+import { useRef } from 'react';
+
 interface LanguageOption {
   code: string;
   name: string;
@@ -25,13 +27,38 @@ export default function LanguageToggle({
   onChange,
   loading,
 }: LanguageToggleProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const filtered = LANGUAGES.filter((l) => available.includes(l.code));
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const buttons = containerRef.current?.querySelectorAll<HTMLButtonElement>('button:not([disabled])');
+    if (!buttons || buttons.length === 0) return;
+    const enabledList = Array.from(buttons);
+    const currentIdx = enabledList.indexOf(e.currentTarget);
+    if (currentIdx === -1) return;
+    const nextIdx =
+      e.key === 'ArrowRight'
+        ? (currentIdx + 1) % enabledList.length
+        : (currentIdx - 1 + enabledList.length) % enabledList.length;
+    enabledList[nextIdx].focus();
+  }
+
   return (
-    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-      {LANGUAGES.filter((l) => available.includes(l.code)).map((lang) => (
+    <div
+      ref={containerRef}
+      role="group"
+      aria-label="Select language"
+      style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}
+    >
+      {filtered.map((lang, index) => (
         <button
           key={lang.code}
           onClick={() => onChange(lang.code)}
+          onKeyDown={(e) => handleKeyDown(e, index)}
           disabled={loading && lang.code !== current}
+          aria-pressed={lang.code === current}
           style={{
             padding: '6px 16px',
             borderRadius: '20px',
