@@ -23,9 +23,9 @@ describe.skipIf(!hasGeminiKey)('Gemini Flash smoke test', () => {
       ],
     });
 
-    expect(result.object).toBeDefined();
-    expect(typeof result.object!.greeting).toBe('string');
-    expect(result.object!.wordCount).toBe(3);
+    expect(result.output).toBeDefined();
+    expect(typeof result.output!.greeting).toBe('string');
+    expect(result.output!.wordCount).toBe(3);
   }, 30000);
 });
 
