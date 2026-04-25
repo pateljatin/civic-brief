@@ -3,7 +3,8 @@ import { generateJSON } from '@/lib/anthropic';
 import { getServerClient } from '@/lib/supabase';
 import { createAuthServerClient } from '@/lib/supabase-server';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
-import { rateLimitByUser, isValidUUID, safeErrorMessage } from '@/lib/security';
+import { isValidUUID, safeErrorMessage } from '@/lib/security';
+import { rateLimitByUserId } from '@/lib/rate-limit';
 import type { VerificationResult } from '@/lib/types';
 
 const MAX_SOURCE_TEXT = 100_000;
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 2. Rate limit: 3 re-verifications per minute per user
-  const rateLimitResponse = rateLimitByUser(userId, 3, 60_000);
+  const rateLimitResponse = await rateLimitByUserId(userId, 3, 60_000);
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

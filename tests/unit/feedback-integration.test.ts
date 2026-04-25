@@ -121,6 +121,17 @@ function createMockDb(overrides: {
         };
       }
 
+      if (table === 'rate_limits') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+        };
+      }
+
       return createQueryBuilder();
     }),
   };
@@ -144,6 +155,23 @@ vi.mock('@/lib/supabase-server', () => ({
 
 vi.mock('@/lib/supabase', () => ({
   getServerClient: vi.fn().mockImplementation(() => mockDb),
+}));
+
+// Mock the persistent rate limiter with a stateful call counter
+const rateLimitCallCounts = new Map<string, number>();
+vi.mock('@/lib/rate-limit', () => ({
+  rateLimitByUserId: vi.fn().mockImplementation(async (userId: string, maxRequests = 5) => {
+    const count = (rateLimitCallCounts.get(userId) ?? 0) + 1;
+    rateLimitCallCounts.set(userId, count);
+    if (count > maxRequests) {
+      const { NextResponse } = await import('next/server');
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before trying again.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+    return null;
+  }),
 }));
 
 // Mock cookies (required by createAuthServerClient in real usage)

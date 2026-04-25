@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateJSON, MODEL, PROMPT_VERSION } from '@/lib/anthropic';
 import { getServerClient } from '@/lib/supabase';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
-import { rateLimit, isValidUUID, isValidLanguageCode, safeErrorMessage } from '@/lib/security';
+import { isValidUUID, isValidLanguageCode, safeErrorMessage } from '@/lib/security';
+import { rateLimitByIp } from '@/lib/rate-limit';
 import type { CivicContent } from '@/lib/types';
 
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -12,7 +13,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  const rateLimitResponse = rateLimit(request);
+  const rateLimitResponse = await rateLimitByIp(request);
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

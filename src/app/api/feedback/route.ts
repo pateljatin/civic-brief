@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerClient } from '@/lib/supabase';
 import { createAuthServerClient } from '@/lib/supabase-server';
-import { rateLimitByUser, sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
+import { sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
+import { rateLimitByUserId } from '@/lib/rate-limit';
 import { FEEDBACK_TYPES } from '@/lib/types';
 import type { FeedbackType } from '@/lib/types';
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 2. Rate limit per user
-  const rateLimitResponse = rateLimitByUser(userId, 5, 60 * 1000);
+  const rateLimitResponse = await rateLimitByUserId(userId, 5, 60_000);
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

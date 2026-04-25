@@ -6,7 +6,8 @@ import { createAuthServerClient } from '@/lib/supabase-server';
 import { CIVIC_SUMMARIZE_SYSTEM, CIVIC_SUMMARIZE_USER } from '@/lib/prompts/civic-summarize';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
-import { rateLimit, validateUrl, validateFile, sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
+import { validateUrl, validateFile, sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
+import { rateLimitByIp } from '@/lib/rate-limit';
 import type { CivicContent, VerificationResult } from '@/lib/types';
 
 /** Normalize a URL for comparison: lowercase host, strip www, remove trailing slash. */
@@ -46,7 +47,7 @@ async function checkDailyLimit(): Promise<{ remaining: number; allowed: boolean 
 
 export async function POST(request: NextRequest) {
   // Rate limiting (per-IP)
-  const rateLimitResponse = rateLimit(request);
+  const rateLimitResponse = await rateLimitByIp(request);
   if (rateLimitResponse) return rateLimitResponse;
 
   // Daily global limit (cost protection)
