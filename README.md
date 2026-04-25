@@ -4,7 +4,7 @@
 [![Mozilla Incubator](https://img.shields.io/badge/Mozilla-Democracy%20x%20AI-ff6611.svg)](https://foundation.mozilla.org)
 [![Built with Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-270%20passing-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
+[![Tests](https://img.shields.io/badge/Tests-375%20passing-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
 [![E2E](https://img.shields.io/badge/E2E-84%20tests-brightgreen.svg)](https://github.com/pateljatin/civic-brief)
 [![Accessibility](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AA-blue.svg)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pateljatin/civic-brief/pulls)
@@ -144,7 +144,7 @@ npm run build
 
 ## Testing
 
-- **270 unit and integration tests** covering components, PDF extraction, prompts, security, types, auth, feed ingestion, pipeline, email alerts, and community feedback
+- **375 unit and integration tests** covering components, PDF extraction, prompts, security, types, auth, feed ingestion, pipeline, email alerts, rate limiting, prompt sanitization, and community feedback
 - **84 E2E tests** (42 specs across desktop and mobile viewports) covering page loads, navigation, form behavior, showcase scenarios, accessibility (WCAG 2.1 AA via axe-core), security headers, and mobile responsiveness
 - Accessibility scans on every page using axe-core
 - Security header verification in E2E
@@ -226,14 +226,12 @@ Working demo live at [civic-brief.vercel.app](https://civic-brief.vercel.app) wi
 
 ## Contributing
 
-This is an open-source civic infrastructure project. Contributions welcome.
+This is an open-source civic infrastructure project. Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, architecture, database patterns, and code standards.
 
-**Getting started:**
-1. Check the [issues tab](https://github.com/pateljatin/civic-brief/issues) for current work
-2. Issues labeled [`good first issue`](https://github.com/pateljatin/civic-brief/labels/good%20first%20issue) are a great starting point
-3. Every issue includes problem context, success criteria, and scope boundaries
-4. Use the issue templates when filing bugs or requesting features
-5. PRs are checked against our [product](docs/standards/PRODUCT_FUNDAMENTALS.md) and [engineering](docs/standards/ENGINEERING_FUNDAMENTALS.md) fundamentals
+**Quick links:**
+- [Issues tab](https://github.com/pateljatin/civic-brief/issues) for current work
+- [`good first issue`](https://github.com/pateljatin/civic-brief/labels/good%20first%20issue) label for a great starting point
+- [Product fundamentals](docs/standards/PRODUCT_FUNDAMENTALS.md) and [engineering fundamentals](docs/standards/ENGINEERING_FUNDAMENTALS.md)
 
 ## Contact
 

@@ -31,6 +31,16 @@ Thumbs.db
 
 # claude
 .claude/
+CLAUDE.md
+
+# playwright MCP session logs
+.playwright-mcp/
+
+# supabase CLI temp files
+supabase/.temp/
+
+# video assets and screenshots (large binaries)
+docs/video-assets/
 
 # test
 test-results/
