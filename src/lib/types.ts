@@ -115,7 +115,8 @@ export type FeedbackType =
   | 'misleading'
   | 'translation_error'
   | 'outdated'
-  | 'helpful';
+  | 'helpful'
+  | 'reverification';
 
 export const FEEDBACK_TYPES: readonly FeedbackType[] = [
   'factual_error',
@@ -124,6 +125,7 @@ export const FEEDBACK_TYPES: readonly FeedbackType[] = [
   'translation_error',
   'outdated',
   'helpful',
+  'reverification',
 ] as const;
 
 export interface CommunityFeedback {

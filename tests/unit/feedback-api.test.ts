@@ -15,8 +15,8 @@ describe('feedback API validation', () => {
       }
     });
 
-    it('has exactly 6 types', () => {
-      expect(FEEDBACK_TYPES).toHaveLength(6);
+    it('has exactly 7 types', () => {
+      expect(FEEDBACK_TYPES).toHaveLength(7);
     });
 
     it('rejects invalid feedback types', () => {
