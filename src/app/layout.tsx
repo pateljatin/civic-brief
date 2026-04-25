@@ -73,6 +73,17 @@ export default function RootLayout({
               Upload
             </a>
             <a
+              href="/location"
+              style={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--muted)',
+                transition: 'color 0.2s',
+              }}
+            >
+              Location
+            </a>
+            <a
               href="/brief/demo"
               style={{
                 fontSize: '14px',

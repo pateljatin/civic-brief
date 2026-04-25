@@ -54,6 +54,64 @@ export interface PipelineResult {
   previous_version_id: string | null;
 }
 
+// ─── Jurisdiction Tagging ───
+
+/**
+ * Tag a brief with its direct jurisdiction and all ancestors.
+ * Uses ON CONFLICT DO NOTHING for idempotency.
+ */
+export async function tagBriefJurisdictions(
+  briefId: string,
+  jurisdictionId: string,
+  assignedBy: 'ai' | 'manual' | 'feed'
+): Promise<void> {
+  const db = safeGetDb();
+  if (!db) return;
+
+  // Insert direct relationship (fire-and-forget, ON CONFLICT is handled by unique constraint)
+  try {
+    await Promise.resolve(
+      db.from('brief_jurisdictions').insert({
+        brief_id: briefId,
+        jurisdiction_id: jurisdictionId,
+        relationship: 'direct',
+        confidence: 1.0,
+        assigned_by: assignedBy,
+      })
+    );
+  } catch {
+    // Unique constraint violation = already tagged, safe to ignore
+  }
+
+  // Get all ancestors and insert ancestor relationships
+  try {
+    const { data: ancestors } = await db.rpc('jurisdiction_ancestors', {
+      jurisdiction_uuid: jurisdictionId,
+    });
+
+    if (ancestors && Array.isArray(ancestors)) {
+      for (const ancestor of ancestors) {
+        if (ancestor.id === jurisdictionId) continue;
+        try {
+          await Promise.resolve(
+            db.from('brief_jurisdictions').insert({
+              brief_id: briefId,
+              jurisdiction_id: ancestor.id,
+              relationship: 'ancestor',
+              confidence: 1.0,
+              assigned_by: 'ai',
+            })
+          );
+        } catch {
+          // Unique constraint violation, safe to ignore
+        }
+      }
+    }
+  } catch {
+    // RPC not available (e.g., test environment), skip ancestor tagging
+  }
+}
+
 // ─── Internal Helpers ───
 
 /** Returns the Supabase server client, or null if not configured. */
@@ -224,6 +282,11 @@ export async function processCivicDocument(params: PipelineParams): Promise<Pipe
 
   if (esError) throw esError;
   const esBrief = esBriefData as { id: string };
+
+  // Tag briefs with jurisdictions (direct + ancestors)
+  const tagAssignedBy = params.ingestedByFeedId ? 'feed' as const : (params.jurisdictionId ? 'manual' as const : 'ai' as const);
+  await tagBriefJurisdictions(enBrief.id, resolvedJurisdictionId, tagAssignedBy);
+  await tagBriefJurisdictions(esBrief.id, resolvedJurisdictionId, tagAssignedBy);
 
   return {
     source_id: source.id,
