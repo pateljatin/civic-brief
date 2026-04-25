@@ -13,7 +13,7 @@
  */
 
 const BASE_URL = process.argv[2] || 'http://localhost:3000';
-const ENDPOINT = '/api/limit'; // GET, no auth needed, rate-limited
+const ENDPOINT = '/api/translate'; // POST, rate-limited by IP, returns 400 for bad input (after rate check)
 const CONCURRENCY = 15; // more than the 10/min limit
 const DELAY_BETWEEN_BATCHES_MS = 200;
 
@@ -25,7 +25,11 @@ interface Result {
 
 async function fireRequest(url: string): Promise<Result> {
   const start = Date.now();
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ briefId: 'test', targetLanguage: 'es' }),
+  });
   const body = await res.text();
   return { status: res.status, body, latencyMs: Date.now() - start };
 }
@@ -41,17 +45,12 @@ async function main() {
     )
   );
 
-  const allowed = results.filter((r) => r.status === 200);
   const blocked = results.filter((r) => r.status === 429);
-  const errors = results.filter((r) => r.status !== 200 && r.status !== 429);
+  const passed = results.filter((r) => r.status !== 429); // 200 or 400 both mean "not rate-limited"
 
   console.log(`Batch 1 (${CONCURRENCY} concurrent):`);
-  console.log(`  Allowed (200): ${allowed.length}`);
+  console.log(`  Passed through (not rate-limited): ${passed.length}`);
   console.log(`  Blocked (429): ${blocked.length}`);
-  if (errors.length > 0) {
-    console.log(`  Errors:        ${errors.length}`);
-    errors.forEach((e) => console.log(`    ${e.status}: ${e.body.slice(0, 100)}`));
-  }
 
   // Wait briefly, then fire another batch to confirm we're still blocked
   await new Promise((r) => setTimeout(r, DELAY_BETWEEN_BATCHES_MS));
@@ -62,11 +61,11 @@ async function main() {
     )
   );
 
-  const allowed2 = results2.filter((r) => r.status === 200);
+  const passed2 = results2.filter((r) => r.status !== 429);
   const blocked2 = results2.filter((r) => r.status === 429);
 
   console.log(`\nBatch 2 (5 follow-up after ${DELAY_BETWEEN_BATCHES_MS}ms):`);
-  console.log(`  Allowed (200): ${allowed2.length}`);
+  console.log(`  Passed through: ${passed2.length}`);
   console.log(`  Blocked (429): ${blocked2.length}`);
 
   // Verdict
