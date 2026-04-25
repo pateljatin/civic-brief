@@ -71,7 +71,7 @@ describe('GET /api/cron/keepalive', () => {
 
     expect(res.status).toBe(500);
     expect(body.ok).toBe(false);
-    expect(body.error).toBe('connection refused');
+    expect(body.error).toBe('Database health check failed');
   });
 
   it('returns 500 when CRON_SECRET is not set', async () => {

@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getServerClient } from '@/lib/supabase';
+import { timingSafeCompare } from '@/lib/ssrf';
 import type { Feed } from '@/lib/types';
 
 // Stale run threshold: runs >30min still marked 'running' are considered stuck.
 const STALE_RUN_THRESHOLD_MS = 30 * 60 * 1000;
-
-// ─── Timing-safe CRON_SECRET comparison ───────────────────────────────────────
-
-function validateCronSecret(provided: string | null, expected: string): boolean {
-  if (!provided) return false;
-  // Pad both to the same length to prevent length-based timing leaks.
-  const a = Buffer.from(provided.padEnd(64, '\0'));
-  const b = Buffer.from(expected.padEnd(64, '\0'));
-  // Buffers must be the same length for timingSafeEqual.
-  return crypto.timingSafeEqual(a.subarray(0, 64), b.subarray(0, 64)) && provided === expected;
-}
 
 // ─── HMAC payload + signature (must match ingest-feed worker) ─────────────────
 
@@ -35,7 +25,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const authHeader = request.headers.get('authorization');
   const providedSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!validateCronSecret(providedSecret, cronSecret)) {
+  if (!providedSecret || !timingSafeCompare(providedSecret, cronSecret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -214,7 +214,7 @@ describe('pipeline', () => {
       // The first call to generateJSON (summarize) should have text <= 100_000 chars
       const firstCallArgs = mockGenerateJSON.mock.calls[0];
       const userMessage: string = firstCallArgs[1];
-      expect(userMessage.length).toBeLessThanOrEqual(100_100); // some overhead for prompt wrapper
+      expect(userMessage.length).toBeLessThanOrEqual(100_500); // overhead: XML delimiters + injection-guard note
     });
 
     it('includes ingestedByFeedId in source insert when provided', async () => {

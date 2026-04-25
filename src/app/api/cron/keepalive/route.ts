@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { getServerClient } from '@/lib/supabase';
-
-// ─── Timing-safe CRON_SECRET comparison ───────────────────────────────────────
-
-function validateCronSecret(provided: string | null, expected: string): boolean {
-  if (!provided) return false;
-  const a = Buffer.from(provided.padEnd(64, '\0'));
-  const b = Buffer.from(expected.padEnd(64, '\0'));
-  return crypto.timingSafeEqual(a.subarray(0, 64), b.subarray(0, 64)) && provided === expected;
-}
+import { timingSafeCompare } from '@/lib/ssrf';
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
 
@@ -22,7 +13,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const authHeader = request.headers.get('authorization');
   const provided = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!validateCronSecret(provided, cronSecret)) {
+  if (!provided || !timingSafeCompare(provided, cronSecret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -38,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (error) {
       console.error('[keepalive] Supabase query failed:', error.message);
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: 'Database health check failed' }, { status: 500 });
     }
 
     console.log('[keepalive] Supabase alive:', data?.length, 'row(s)');

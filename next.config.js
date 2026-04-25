@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV === 'development';
+
 const nextConfig = {
   serverExternalPackages: ['unpdf'],
 
@@ -31,11 +33,15 @@ const nextConfig = {
               'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
           // Content Security Policy
+          // Dev: allow unsafe-eval (Turbopack HMR) and unsafe-inline scripts
+          // Prod: remove both — external scripts via va.vercel-scripts.com only
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+              isDev
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com"
+                : "script-src 'self' https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://lh3.googleusercontent.com",
