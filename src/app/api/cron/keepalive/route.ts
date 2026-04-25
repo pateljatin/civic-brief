@@ -29,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (error) {
       console.error('[keepalive] Supabase query failed:', error.message);
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: 'Database health check failed' }, { status: 500 });
     }
 
     console.log('[keepalive] Supabase alive:', data?.length, 'row(s)');
