@@ -56,7 +56,7 @@ as $$
   select
     b.id as brief_id,
     b.headline,
-    s.url as source_url,
+    s.source_url,
     dt.name as document_type,
     l.bcp47 as language,
     j.name as jurisdiction_name,
