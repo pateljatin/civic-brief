@@ -11,12 +11,15 @@ interface ScrollFadeInProps {
 export default function ScrollFadeIn({ children, delay, className }: ScrollFadeInProps) {
   const ref = useRef<HTMLDivElement>(null);
 
-  // SSR / no-IntersectionObserver: render visible immediately
-  const noIO = typeof IntersectionObserver === 'undefined';
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // No IntersectionObserver (rare): show immediately
+    if (typeof IntersectionObserver === 'undefined') {
+      el.classList.add('visible');
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,7 +40,7 @@ export default function ScrollFadeIn({ children, delay, className }: ScrollFadeI
     };
   }, []);
 
-  const classes = ['scroll-fade-in', noIO ? 'visible' : '', className ?? '']
+  const classes = ['scroll-fade-in', className ?? '']
     .filter(Boolean)
     .join(' ');
 

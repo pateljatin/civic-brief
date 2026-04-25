@@ -1,0 +1,6 @@
+{
+  "unit": 322,
+  "e2e": 84,
+  "updated": "2026-04-21",
+  "note": "Bump these numbers when adding tests. CI and npm run test:check assert actual >= baseline."
+}
