@@ -212,3 +212,28 @@ export function isValidUUID(id: string): boolean {
 export function isValidLanguageCode(code: string): boolean {
   return /^[a-z]{2,3}(-[A-Z]{2})?$/.test(code);
 }
+
+// ── Error Sanitization ──
+// Prevents leaking Supabase schema details, Anthropic prompt fragments,
+// or stack traces to the client.
+
+const SAFE_ERROR_PATTERNS: Array<{ pattern: RegExp; message: string }> = [
+  { pattern: /API key/i, message: 'AI service temporarily unavailable.' },
+  { pattern: /rate limit/i, message: 'Too many requests. Please try again shortly.' },
+  { pattern: /ANTHROPIC_API_KEY/i, message: 'AI service not configured.' },
+  { pattern: /too long|cut off|max_tokens/i, message: 'Document is too large to process. Try a shorter document.' },
+  { pattern: /parse/i, message: 'Failed to process the document. Please try again.' },
+  { pattern: /PDF/i, message: 'Could not read the PDF. The file may be corrupted or password-protected.' },
+];
+
+/** Return a safe error message for client responses. Never exposes internals. */
+export function safeErrorMessage(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error);
+
+  for (const { pattern, message } of SAFE_ERROR_PATTERNS) {
+    if (pattern.test(raw)) return message;
+  }
+
+  // Generic fallback: never return the raw message
+  return 'An unexpected error occurred. Please try again.';
+}

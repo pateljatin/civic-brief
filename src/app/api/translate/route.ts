@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateJSON, MODEL, PROMPT_VERSION } from '@/lib/anthropic';
 import { getServerClient } from '@/lib/supabase';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
-import { rateLimit, isValidUUID, isValidLanguageCode } from '@/lib/security';
+import { rateLimit, isValidUUID, isValidLanguageCode, safeErrorMessage } from '@/lib/security';
 import type { CivicContent } from '@/lib/types';
 
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -142,9 +142,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Translate error:', error);
-    const message =
-      error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 });
   }
 }
 

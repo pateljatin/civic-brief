@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateJSON } from '@/lib/anthropic';
 import { getServerClient } from '@/lib/supabase';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
-import { rateLimit, isValidUUID } from '@/lib/security';
+import { rateLimit, isValidUUID, safeErrorMessage } from '@/lib/security';
 import type { VerificationResult } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -93,9 +93,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Verify error:', error);
-    const message =
-      error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 });
   }
 }
 

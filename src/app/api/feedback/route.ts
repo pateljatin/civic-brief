@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerClient } from '@/lib/supabase';
 import { createAuthServerClient } from '@/lib/supabase-server';
-import { rateLimitByUser, sanitizeText, isValidUUID } from '@/lib/security';
+import { rateLimitByUser, sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
 import { FEEDBACK_TYPES } from '@/lib/types';
 import type { FeedbackType } from '@/lib/types';
 
@@ -122,8 +122,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, feedbackType });
   } catch (error) {
     console.error('Feedback error:', error);
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 });
   }
 }
 

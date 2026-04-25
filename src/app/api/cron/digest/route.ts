@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { getServerClient } from '@/lib/supabase';
+import { timingSafeCompare } from '@/lib/ssrf';
 import { buildDigestSummary, buildDigestHtml } from '@/lib/email/digest';
 
 export async function GET(request: NextRequest) {
@@ -9,16 +9,7 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const headerSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-  if (!cronSecret || !headerSecret) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const expectedBuf = Buffer.from(cronSecret);
-  const actualBuf = Buffer.from(headerSecret);
-  if (
-    expectedBuf.length !== actualBuf.length ||
-    !crypto.timingSafeEqual(expectedBuf, actualBuf)
-  ) {
+  if (!cronSecret || !headerSecret || !timingSafeCompare(headerSecret, cronSecret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

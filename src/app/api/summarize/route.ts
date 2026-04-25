@@ -6,7 +6,7 @@ import { createAuthServerClient } from '@/lib/supabase-server';
 import { CIVIC_SUMMARIZE_SYSTEM, CIVIC_SUMMARIZE_USER } from '@/lib/prompts/civic-summarize';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
-import { rateLimit, validateUrl, validateFile, sanitizeText } from '@/lib/security';
+import { rateLimit, validateUrl, validateFile, sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
 import type { CivicContent, VerificationResult } from '@/lib/types';
 
 /** Normalize a URL for comparison: lowercase host, strip www, remove trailing slash. */
@@ -103,6 +103,14 @@ export async function POST(request: NextRequest) {
     const fileCheck = validateFile(file);
     if (!fileCheck.valid) {
       return NextResponse.json({ error: fileCheck.error }, { status: 400 });
+    }
+
+    // Validate optional jurisdictionId
+    if (jurisdictionId && !isValidUUID(jurisdictionId)) {
+      return NextResponse.json(
+        { error: 'Invalid jurisdiction ID format.' },
+        { status: 400 }
+      );
     }
 
     // Sanitize optional text inputs
@@ -410,9 +418,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Summarize error:', error);
-    const message =
-      error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 });
   }
 }
 
