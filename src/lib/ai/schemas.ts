@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
-// ─── Eval Vision (C16: design/layout compliance via screenshot) ───
+// ─── Re-export eval schemas from canonical location ───
+export { EvalDetailsSchema, EvalResultSchema } from '@/lib/eval/schemas';
+export type { EvalDetails, EvalResult } from '@/lib/eval/schemas';
 
+// Legacy schemas kept for any existing imports (remove in follow-up)
 export const EvalVisionResultSchema = z.object({
   route: z.string(),
   layoutScore: z.number().min(1).max(5),
@@ -13,8 +16,6 @@ export const EvalVisionResultSchema = z.object({
 });
 
 export type EvalVisionResult = z.infer<typeof EvalVisionResultSchema>;
-
-// ─── Eval Tone (C16: readability, jargon, and tone scoring) ───
 
 export const EvalToneResultSchema = z.object({
   briefId: z.string(),
