@@ -134,6 +134,9 @@ async function getBrief(id: string) {
         published_at,
         source_id,
         language_id,
+        eval_overall_score,
+        eval_scored_at,
+        eval_details,
         sources (
           id,
           source_url,
@@ -256,6 +259,7 @@ export default async function BriefPage({ params }: PageProps) {
           helpfulCount={0}
           isSignedIn={false}
           isDemo={true}
+          evalDetails={{ readabilityGrade: 7.2, readabilityEase: 65, toneScore: 4, jargonScore: 5 }}
         />
       </div>
     );
@@ -311,6 +315,12 @@ export default async function BriefPage({ params }: PageProps) {
         userFeedback={feedbackData.userFeedback}
         isSignedIn={feedbackData.isSignedIn}
         generatedAt={briefData.created_at}
+        evalDetails={briefData.eval_details ? {
+          readabilityGrade: (briefData.eval_details as Record<string, unknown>).readabilityGrade as number,
+          readabilityEase: (briefData.eval_details as Record<string, unknown>).readabilityEase as number,
+          toneScore: (briefData.eval_details as Record<string, unknown>).toneScore as number | undefined,
+          jargonScore: (briefData.eval_details as Record<string, unknown>).jargonScore as number | undefined,
+        } : null}
       />
     </div>
   );
