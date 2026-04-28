@@ -15,6 +15,7 @@ import { CIVIC_SUMMARIZE_SYSTEM, CIVIC_SUMMARIZE_USER } from '@/lib/prompts/civi
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
 import { CIVIC_TRANSLATE_SYSTEM, CIVIC_TRANSLATE_USER } from '@/lib/prompts/civic-translate';
 import type { CivicContent, VerificationResult } from '@/lib/types';
+import { scoreBriefSync, scoreBriefFull } from '@/lib/eval';
 
 export const MAX_TEXT_LENGTH = 100_000; // ~25K words, well within Claude's context
 
@@ -52,6 +53,8 @@ export interface PipelineResult {
   translations: { language: string; content: CivicContent }[];
   /** Previous version brief ID (passed through from params). */
   previous_version_id: string | null;
+  /** Eval scores computed for the English brief (FK readability + tone). */
+  evalDetails?: { readabilityGrade: number; readabilityEase: number };
 }
 
 // ─── Jurisdiction Tagging ───
@@ -288,6 +291,36 @@ export async function processCivicDocument(params: PipelineParams): Promise<Pipe
   await tagBriefJurisdictions(enBrief.id, resolvedJurisdictionId, tagAssignedBy);
   await tagBriefJurisdictions(esBrief.id, resolvedJurisdictionId, tagAssignedBy);
 
+  // Step 6: Eval scoring (FK sync + Gemini async)
+  const briefTextForEval = buildSummaryText(civicContent);
+  const syncEval = scoreBriefSync(briefTextForEval);
+
+  // Write FK-only scores immediately
+  Promise.resolve(
+    db.from('briefs')
+      .update({
+        eval_overall_score: syncEval.overallScore,
+        eval_scored_at: new Date().toISOString(),
+        eval_details: syncEval.details,
+      })
+      .eq('id', enBrief.id)
+  ).catch((err: unknown) => console.error('Failed to write FK eval scores:', err));
+
+  // Fire Gemini tone scoring async (non-blocking, backfills scores)
+  scoreBriefFull(briefTextForEval)
+    .then((fullEval) => {
+      Promise.resolve(
+        db.from('briefs')
+          .update({
+            eval_overall_score: fullEval.overallScore,
+            eval_scored_at: new Date().toISOString(),
+            eval_details: fullEval.details,
+          })
+          .eq('id', enBrief.id)
+      ).catch((err: unknown) => console.error('Failed to write full eval scores:', err));
+    })
+    .catch((err: unknown) => console.error('Full eval scoring failed:', err));
+
   return {
     source_id: source.id,
     brief_ids: [
@@ -301,5 +334,9 @@ export async function processCivicDocument(params: PipelineParams): Promise<Pipe
     content: civicContent,
     translations,
     previous_version_id: previousBriefId,
+    evalDetails: {
+      readabilityGrade: syncEval.details.readabilityGrade,
+      readabilityEase: syncEval.details.readabilityEase,
+    },
   };
 }

@@ -125,6 +125,9 @@ export interface Brief {
   model_used: string;
   prompt_version: string;
   created_at: string;
+  eval_overall_score: number | null;
+  eval_scored_at: string | null;
+  eval_details: Record<string, unknown> | null;
 }
 
 export interface BriefTopic {
@@ -223,6 +226,10 @@ export type SummarizeResult =
         content: CivicContent;
         confidence_score: number;
         confidence_level: 'high' | 'medium' | 'low';
+        evalDetails?: {
+          readabilityGrade: number;
+          readabilityEase: number;
+        };
       };
       verification?: VerificationResult;
       translations: {
