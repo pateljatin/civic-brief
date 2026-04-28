@@ -41,7 +41,7 @@ describe('computeOverallScore', () => {
   });
 
   it('computes FK-only score when tone is not yet available', () => {
-    // Grade 7 (1.0) * 0.4 = 0.4, tone/jargon weights redistributed: 0.4/0.4 = 1.0
+    // FK-only path: readability normalized (1.0 for grade <= 8) returned as-is, no weight redistribution
     const score = computeOverallScore(
       { grade: 7.0, ease: 70, wordCount: 100, sentenceCount: 10, syllableCount: 130 },
       null
