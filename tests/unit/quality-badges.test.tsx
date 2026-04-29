@@ -22,13 +22,21 @@ describe('QualityBadges', () => {
     expect(screen.getByText(/4\/5/)).toBeDefined();
   });
 
-  it('shows scoring state when tone is not yet available', () => {
+  it('renders only readability badge when tone is not yet available', () => {
     render(<QualityBadges evalDetails={{ readabilityGrade: 7.2, readabilityEase: 65 }} />);
-    expect(screen.getByText(/Scoring/)).toBeDefined();
+    expect(screen.getByText(/Grade 7/)).toBeDefined();
+    expect(screen.queryByText(/Plain Language/)).toBeNull();
   });
 
   it('renders nothing when evalDetails is null', () => {
     const { container } = render(<QualityBadges evalDetails={null} />);
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('renders nothing when readabilityGrade is missing or non-numeric', () => {
+    const { container } = render(
+      <QualityBadges evalDetails={{ readabilityGrade: NaN, readabilityEase: 0 }} />
+    );
     expect(container.innerHTML).toBe('');
   });
 

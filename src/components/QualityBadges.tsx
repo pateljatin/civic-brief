@@ -69,7 +69,7 @@ const dotStyle = {
 } as const;
 
 export default function QualityBadges({ evalDetails, lang = 'en' }: QualityBadgesProps) {
-  if (!evalDetails) return null;
+  if (!evalDetails || !Number.isFinite(evalDetails.readabilityGrade)) return null;
 
   const ui = getUIStrings(lang);
   const roundedGrade = Math.round(evalDetails.readabilityGrade);
@@ -90,8 +90,10 @@ export default function QualityBadges({ evalDetails, lang = 'en' }: QualityBadge
         Grade {roundedGrade} {ui.readingLevel}
       </div>
 
-      {/* Tone Badge */}
-      {hasTone ? (
+      {/* Tone Badge — only shown when Gemini scoring has completed.
+          On SSR pages there is no client-side update path, so we suppress
+          the pending state rather than render a permanently stuck "Scoring..." pill. */}
+      {hasTone && (
         <div
           style={{
             ...badgeStyle,
@@ -104,21 +106,6 @@ export default function QualityBadges({ evalDetails, lang = 'en' }: QualityBadge
             style={{ ...dotStyle, background: getToneColor(evalDetails.toneScore!).color }}
           />
           {ui.plainLanguage}: {evalDetails.toneScore}/5
-        </div>
-      ) : (
-        <div
-          style={{
-            ...badgeStyle,
-            background: 'var(--warm, #f5f0e8)',
-            color: 'var(--muted, #8a8a92)',
-            animation: 'pulse 2s ease-in-out infinite',
-          }}
-        >
-          <span
-            aria-hidden="true"
-            style={{ ...dotStyle, background: 'var(--muted, #8a8a92)' }}
-          />
-          {ui.plainLanguage}: {ui.scoring}
         </div>
       )}
     </div>
