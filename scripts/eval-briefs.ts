@@ -7,8 +7,11 @@
  * Optional: GOOGLE_GENERATIVE_AI_API_KEY (for tone scoring; FK-only without it)
  */
 
+import { config as loadEnv } from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import { scoreBriefSync, scoreBriefFull } from '../src/lib/eval';
+
+loadEnv({ path: '.env.local', quiet: true });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
