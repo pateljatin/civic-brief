@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { CivicContent, FeedbackType, VerificationResult } from '@/lib/types';
 import { getUIStrings } from '@/lib/ui-strings';
 import ConfidenceScore from './ConfidenceScore';
+import QualityBadges from './QualityBadges';
 import SourceLink from './SourceLink';
 import LanguageToggle from './LanguageToggle';
 import FeedbackSection from './FeedbackSection';
@@ -71,6 +72,12 @@ interface CivicBriefProps {
   isSignedIn?: boolean;
   isDemo?: boolean;
   generatedAt?: string;
+  evalDetails?: {
+    readabilityGrade: number;
+    readabilityEase: number;
+    toneScore?: number;
+    jargonScore?: number;
+  } | null;
 }
 
 interface BriefSectionProps {
@@ -138,6 +145,7 @@ export default function CivicBrief({
   isSignedIn = false,
   isDemo = false,
   generatedAt,
+  evalDetails,
 }: CivicBriefProps) {
   const [showVerification, setShowVerification] = useState(false);
   const [activeLang, setActiveLang] = useState(currentLanguage);
@@ -265,7 +273,10 @@ export default function CivicBrief({
             gap: '12px',
           }}
         >
-          <ConfidenceScore score={confidenceScore} level={confidenceLevel} lang={activeLang} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+            <ConfidenceScore score={confidenceScore} level={confidenceLevel} lang={activeLang} />
+            <QualityBadges evalDetails={evalDetails ?? null} lang={activeLang} />
+          </div>
           {displayLanguages.length > 1 && (
             <LanguageToggle
               current={activeLang}

@@ -20,6 +20,9 @@ export interface UIStrings {
   highConfidence: string;
   mediumConfidence: string;
   lowConfidence: string;
+  readingLevel: string;
+  plainLanguage: string;
+  scoring: string;
 }
 
 const strings: Record<string, UIStrings> = {
@@ -39,6 +42,9 @@ const strings: Record<string, UIStrings> = {
     highConfidence: 'High confidence',
     mediumConfidence: 'Medium confidence',
     lowConfidence: 'Low confidence',
+    readingLevel: 'Reading Level',
+    plainLanguage: 'Plain Language',
+    scoring: 'Scoring...',
   },
   es: {
     whatChanged: 'Que cambio',
@@ -56,6 +62,9 @@ const strings: Record<string, UIStrings> = {
     highConfidence: 'Alta confianza',
     mediumConfidence: 'Confianza media',
     lowConfidence: 'Baja confianza',
+    readingLevel: 'Nivel de Lectura',
+    plainLanguage: 'Lenguaje Sencillo',
+    scoring: 'Evaluando...',
   },
   hi: {
     whatChanged: 'Kya badla',
@@ -73,6 +82,9 @@ const strings: Record<string, UIStrings> = {
     highConfidence: 'Ucch vishvas',
     mediumConfidence: 'Madhyam vishvas',
     lowConfidence: 'Kam vishvas',
+    readingLevel: 'पठन स्तर',
+    plainLanguage: 'सरल भाषा',
+    scoring: 'मूल्यांकन...',
   },
 };
 

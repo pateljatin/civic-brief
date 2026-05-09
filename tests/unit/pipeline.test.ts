@@ -62,8 +62,12 @@ describe('pipeline', () => {
             .mockResolvedValueOnce({ data: { id: 'brief-es' }, error: null }), // es brief
         }),
       });
+      const mockUpdate = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
       const mockFrom = vi.fn().mockReturnValue({
         insert: mockInsert,
+        update: mockUpdate,
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi
@@ -255,8 +259,12 @@ describe('pipeline', () => {
             .mockResolvedValueOnce({ data: { id: 'brief-es-feed' }, error: null }),
         }),
       });
+      const mockUpdate2 = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
       const mockFrom = vi.fn().mockReturnValue({
         insert: mockInsert,
+        update: mockUpdate2,
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi
@@ -323,8 +331,12 @@ describe('pipeline', () => {
             .mockResolvedValueOnce({ data: { id: 'brief-es-v2' }, error: null }),
         }),
       });
+      const mockUpdate3 = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
       const mockFrom = vi.fn().mockReturnValue({
         insert: mockInsert,
+        update: mockUpdate3,
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi
