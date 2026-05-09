@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateTone } from '@/lib/eval/tone';
 
-const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 describe.skipIf(!hasGeminiKey)('evaluateTone (Gemini Flash)', () => {
   it('scores plain-language civic text with high tone and jargon scores', async () => {
@@ -32,7 +32,7 @@ describe.skipIf(!hasGeminiKey)('evaluateTone (Gemini Flash)', () => {
 });
 
 describe.skipIf(hasGeminiKey)('evaluateTone without API key', () => {
-  it('skips when GOOGLE_GENERATIVE_AI_KEY is not set', () => {
+  it('skips when GOOGLE_GENERATIVE_AI_API_KEY is not set', () => {
     expect(hasGeminiKey).toBe(false);
   });
 });

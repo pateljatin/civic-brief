@@ -85,7 +85,7 @@ export const infra = {
 
 Adding a provider later: `npm install @ai-sdk/openai`, add one line. No interfaces, no adapters, no registry.
 
-Auth approach: Direct API keys (ANTHROPIC_API_KEY, GOOGLE_GENERATIVE_AI_KEY) in .env.local. Vercel AI Gateway is available as a future upgrade for cost dashboards and failover, but adds complexity we don't need yet. Switching to Gateway later is a 30-minute change (swap model imports for string slugs).
+Auth approach: Direct API keys (ANTHROPIC_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY) in .env.local. Vercel AI Gateway is available as a future upgrade for cost dashboards and failover, but adds complexity we don't need yet. Switching to Gateway later is a 30-minute change (swap model imports for string slugs).
 
 ### schemas.ts
 
@@ -159,12 +159,12 @@ const result = await generateText({
 
 | Name | Where | Who provisions | Required? |
 |------|-------|----------------|-----------|
-| `GOOGLE_GENERATIVE_AI_KEY` | .env.local, Vercel prod, Vercel preview | Manual (Google AI Studio) | Yes for eval features; app runs without it |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | .env.local, Vercel prod, Vercel preview | Manual (Google AI Studio) | Yes for eval features; app runs without it |
 
 ### Graceful degradation
 
-If `GOOGLE_GENERATIVE_AI_KEY` is not set:
-- `infra` models throw a clear error when called: "GOOGLE_GENERATIVE_AI_KEY is not set. Eval features require a Gemini API key."
+If `GOOGLE_GENERATIVE_AI_API_KEY` is not set:
+- `infra` models throw a clear error when called: "GOOGLE_GENERATIVE_AI_API_KEY is not set. Eval features require a Gemini API key."
 - All existing functionality is unaffected (uses `anthropic.ts` directly, not `models.ts`)
 - CI tests that don't test eval pass without the key
 
@@ -208,11 +208,11 @@ If `GOOGLE_GENERATIVE_AI_KEY` is not set:
 | `infra models use google provider` | Eval workloads route to Gemini |
 | `schemas validate correct input` | Zod schemas accept well-formed data |
 | `schemas reject malformed input` | Zod schemas catch bad LLM output |
-| `missing GOOGLE_GENERATIVE_AI_KEY throws descriptive error` | Graceful degradation message |
+| `missing GOOGLE_GENERATIVE_AI_API_KEY throws descriptive error` | Graceful degradation message |
 
 ### Integration test (new file: `tests/integration/ai-provider-smoke.test.ts`)
 
-One test that calls Gemini Flash with a trivial prompt and validates structured JSON response. Skipped when `GOOGLE_GENERATIVE_AI_KEY` is not set (same pattern as Supabase tests in CI).
+One test that calls Gemini Flash with a trivial prompt and validates structured JSON response. Skipped when `GOOGLE_GENERATIVE_AI_API_KEY` is not set (same pattern as Supabase tests in CI).
 
 ### Existing tests
 
@@ -230,7 +230,7 @@ All existing unit/integration tests and E2E tests must pass with zero failures. 
 | 4 | Live site works: upload PDF, get brief, translate, verify | Manual browser test |
 | 5 | New provider module exports are importable | Unit test |
 | 6 | Gemini Flash returns structured JSON matching Zod schema | Integration smoke test |
-| 7 | Missing GOOGLE_GENERATIVE_AI_KEY produces clear error (not crash) | Unit test |
+| 7 | Missing GOOGLE_GENERATIVE_AI_API_KEY produces clear error (not crash) | Unit test |
 | 8 | No changes to existing anthropic.ts, pipeline.ts, or prompts/ | `git diff` inspection |
 | 9 | Build succeeds on Vercel (preview deploy) | Vercel preview URL |
 
@@ -260,7 +260,7 @@ Not applicable. This spec adds a module with no write paths. The `models.ts` fil
 | AI SDK adds bundle size | It is tree-shakeable; only imported providers are bundled. Verify with `next build` output. |
 | Gemini structured output differs from Anthropic | Zod schema validation catches shape mismatches at runtime. Integration smoke test validates. |
 | Zod dependency conflicts | Check for existing Zod usage (none currently). Pin to latest stable. |
-| GOOGLE_GENERATIVE_AI_KEY leaks | Same .env.local pattern as ANTHROPIC_API_KEY. Never committed. |
+| GOOGLE_GENERATIVE_AI_API_KEY leaks | Same .env.local pattern as ANTHROPIC_API_KEY. Never committed. |
 
 ---
 

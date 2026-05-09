@@ -434,7 +434,7 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { infra } from '@/lib/ai/models';
 
-const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 describe.skipIf(!hasGeminiKey)('Gemini Flash smoke test', () => {
   it('returns structured JSON matching a Zod schema', async () => {
@@ -461,7 +461,7 @@ describe.skipIf(!hasGeminiKey)('Gemini Flash smoke test', () => {
 });
 
 describe.skipIf(hasGeminiKey)('Gemini Flash without API key', () => {
-  it('skips when GOOGLE_GENERATIVE_AI_KEY is not set', () => {
+  it('skips when GOOGLE_GENERATIVE_AI_API_KEY is not set', () => {
     // This test documents that the smoke test is intentionally skipped in CI
     // when the Gemini API key is not configured.
     expect(hasGeminiKey).toBe(false);
@@ -476,7 +476,7 @@ Expected: 1 test passes (the "skips" documentation test), 1 test skipped.
 
 - [ ] **Step 3: Run with API key (local dev scenario)**
 
-Ensure `GOOGLE_GENERATIVE_AI_KEY` is set in `.env.local`, then:
+Ensure `GOOGLE_GENERATIVE_AI_API_KEY` is set in `.env.local`, then:
 Run: `npx vitest run tests/integration/ai-provider-smoke.test.ts`
 Expected: Smoke test passes, returns valid structured JSON.
 
@@ -588,6 +588,6 @@ Expected: No new errors. No references to Gemini or AI SDK in any production pag
 | Live site works end-to-end | Task 7 |
 | New provider module exports are importable | Task 4, Step 2 |
 | Gemini Flash returns structured JSON | Task 5, Step 3 |
-| Missing GOOGLE_GENERATIVE_AI_KEY produces clear error | Task 5, Step 2 |
+| Missing GOOGLE_GENERATIVE_AI_API_KEY produces clear error | Task 5, Step 2 |
 | No changes to existing anthropic.ts, pipeline.ts, prompts/ | Task 6, Step 6 |
 | Build succeeds | Task 6, Step 7 |

@@ -34,7 +34,7 @@ npm install
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project settings | Yes (database) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project settings | Yes (database) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase project settings | Yes (API routes) |
-| `GOOGLE_GENERATIVE_AI_KEY` | [aistudio.google.com](https://aistudio.google.com) | No (eval only) |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | [aistudio.google.com](https://aistudio.google.com) | No (eval only) |
 
 The app works without Supabase configured. Upload and summarization still function; results just won't be persisted.
 

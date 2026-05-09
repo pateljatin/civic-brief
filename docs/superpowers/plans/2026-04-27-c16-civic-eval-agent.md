@@ -622,7 +622,7 @@ Create `tests/integration/eval-tone.test.ts`:
 import { describe, it, expect } from 'vitest';
 import { evaluateTone } from '@/lib/eval/tone';
 
-const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 describe.skipIf(!hasGeminiKey)('evaluateTone (Gemini Flash)', () => {
   it('scores plain-language civic text with high tone and jargon scores', async () => {
@@ -653,7 +653,7 @@ describe.skipIf(!hasGeminiKey)('evaluateTone (Gemini Flash)', () => {
 });
 
 describe.skipIf(hasGeminiKey)('evaluateTone without API key', () => {
-  it('skips when GOOGLE_GENERATIVE_AI_KEY is not set', () => {
+  it('skips when GOOGLE_GENERATIVE_AI_API_KEY is not set', () => {
     expect(hasGeminiKey).toBe(false);
   });
 });
@@ -722,7 +722,7 @@ export async function evaluateTone(briefText: string): Promise<ToneResult> {
 }
 ```
 
-- [ ] **Step 3: Run integration test (requires GOOGLE_GENERATIVE_AI_KEY)**
+- [ ] **Step 3: Run integration test (requires GOOGLE_GENERATIVE_AI_API_KEY)**
 
 ```bash
 npx vitest run tests/integration/eval-tone.test.ts
@@ -1445,7 +1445,7 @@ Create `scripts/eval-briefs.ts`:
  * Usage: npx tsx scripts/eval-briefs.ts [--dry-run] [--limit N]
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
- * Optional: GOOGLE_GENERATIVE_AI_KEY (for tone scoring; FK-only without it)
+ * Optional: GOOGLE_GENERATIVE_AI_API_KEY (for tone scoring; FK-only without it)
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -1465,7 +1465,7 @@ const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const limitIdx = args.indexOf('--limit');
 const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : 100;
-const hasGemini = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGemini = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 async function main() {
   console.log(`Backfill eval scores (dry-run: ${dryRun}, limit: ${limit}, gemini: ${hasGemini})`);
