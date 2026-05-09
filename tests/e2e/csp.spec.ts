@@ -1,5 +1,19 @@
 import { test, expect } from '@playwright/test';
 
+// Vercel preview deployments are auth-walled by Deployment Protection. The
+// bypass header is only sent when the secret is present (no-op locally and
+// against public production). The set-bypass-cookie header asks Vercel to also
+// set a session cookie so navigation requests Playwright initiates outside
+// extraHTTPHeaders coverage still bypass the wall.
+const extraHTTPHeaders: Record<string, string> = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+  ? {
+      'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+      'x-vercel-set-bypass-cookie': 'true',
+    }
+  : {};
+
+test.use({ extraHTTPHeaders });
+
 /**
  * Regression test for the C17/C18 CSP miss (issue #61).
  *

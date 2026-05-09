@@ -169,6 +169,14 @@ We take security seriously because civic misinformation is a democratic harm.
 - **HMAC authentication** on internal worker endpoints
 - **Privacy by design**: We never store uploaded documents, collect PII, or set tracking cookies
 
+### Automated CSP Regression Check
+
+Every PR triggers a Vercel preview deploy. After the preview is ready, a GitHub Actions workflow runs `tests/e2e/csp.spec.ts` against the preview URL. This check catches Content Security Policy regressions in a real browser before they reach production. The check exists because a prior CSP regression broke production hydration; verification against dev mode and curl missed this issue class entirely.
+
+**Maintainer setup**: This check requires a Vercel Protection Bypass for Automation token. Generate one in your Vercel Dashboard under Project Settings, Deployment Protection. Add it as the GitHub Actions secret `VERCEL_AUTOMATION_BYPASS_SECRET`. Contributors opening PRs from forks do not need to set this up; maintainers enable the preview after approving the PR.
+
+**Debugging a failed check**: Download the `playwright-report-csp` artifact from the failed GitHub Actions workflow run. Open `index.html` in the artifact in your browser to see the full Playwright report, including screenshots and network traces.
+
 ## Civic-Context Prompting
 
 This is what differentiates Civic Brief from generic summarization. Every prompt produces structured JSON answering:
