@@ -4,7 +4,7 @@
  * Usage: npx tsx scripts/eval-briefs.ts [--dry-run] [--limit N]
  *
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
- * Optional: GOOGLE_GENERATIVE_AI_KEY (for tone scoring; FK-only without it)
+ * Optional: GOOGLE_GENERATIVE_AI_API_KEY (for tone scoring; FK-only without it)
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -24,7 +24,7 @@ const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const limitIdx = args.indexOf('--limit');
 const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : 100;
-const hasGemini = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGemini = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 async function main() {
   console.log(`Backfill eval scores (dry-run: ${dryRun}, limit: ${limit}, gemini: ${hasGemini})`);

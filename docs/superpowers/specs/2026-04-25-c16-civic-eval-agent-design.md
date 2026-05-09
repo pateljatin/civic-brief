@@ -281,7 +281,7 @@ Two eval backfill runs simultaneously:
 - `@ai-sdk/google` (already installed via C15) -- for Gemini Flash
 - `ai` (already installed via C15) -- AI SDK core
 
-No new external services. No new env vars (GOOGLE_GENERATIVE_AI_KEY already configured for C15).
+No new external services. No new env vars (GOOGLE_GENERATIVE_AI_API_KEY already configured for C15).
 
 ---
 
@@ -308,7 +308,7 @@ No new external services. No new env vars (GOOGLE_GENERATIVE_AI_KEY already conf
 
 ### Integration Tests
 
-- `tone.ts`: Smoke test with Gemini Flash (skip when GOOGLE_GENERATIVE_AI_KEY not set, same pattern as C15).
+- `tone.ts`: Smoke test with Gemini Flash (skip when GOOGLE_GENERATIVE_AI_API_KEY not set, same pattern as C15).
 - Pipeline integration: Upload a brief, verify eval_overall_score is populated (requires Supabase + Gemini).
 
 ### E2E Tests (Playwright)

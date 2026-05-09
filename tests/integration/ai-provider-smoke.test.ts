@@ -3,7 +3,7 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { infra } from '@/lib/ai/models';
 
-const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_KEY;
+const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 describe.skipIf(!hasGeminiKey)('Gemini Flash smoke test', () => {
   it('returns structured JSON matching a Zod schema', async () => {
@@ -30,7 +30,7 @@ describe.skipIf(!hasGeminiKey)('Gemini Flash smoke test', () => {
 });
 
 describe.skipIf(hasGeminiKey)('Gemini Flash without API key', () => {
-  it('skips when GOOGLE_GENERATIVE_AI_KEY is not set', () => {
+  it('skips when GOOGLE_GENERATIVE_AI_API_KEY is not set', () => {
     expect(hasGeminiKey).toBe(false);
   });
 });
