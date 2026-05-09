@@ -1,0 +1,69 @@
+name: CSP Regression Check
+
+on:
+  deployment_status: {}
+
+jobs:
+  csp-check:
+    runs-on: ubuntu-latest
+
+    # Run only when a Vercel Preview deployment succeeds.
+    # The environment_url host check defensively skips production aliases
+    # (*.vercel.app with no branch slug) that sometimes fire with state=success
+    # and environment=Preview when a prod re-deploy is triggered from a branch.
+    if: |
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Preview' &&
+      !contains(github.event.deployment_status.environment_url, 'civic-brief.vercel.app')
+
+    permissions:
+      contents: read
+      deployments: read
+
+    steps:
+      # Verify the bypass secret is present before doing any work.
+      # Without it every Playwright request returns 401 from Vercel Deployment
+      # Protection and the test trivially "passes" with no real assertions.
+      # See CONTRIBUTING.md for setup instructions.
+      - name: Verify bypass secret is set
+        run: |
+          if [ -z "${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" ]; then
+            echo "::error::VERCEL_AUTOMATION_BYPASS_SECRET is not set. Add it to repository secrets (Settings > Secrets > Actions). See CONTRIBUTING.md for setup instructions."
+            exit 1
+          fi
+
+      # Check out the exact commit Vercel deployed, not the current HEAD of
+      # main. The PR may have additional commits since this deployment fired.
+      - name: Checkout deployment SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run CSP regression test
+        run: npx playwright test tests/e2e/csp.spec.ts --project=chromium
+        env:
+          E2E_BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          # Read by tests/e2e/csp.spec.ts to inject the bypass header
+          # (x-vercel-protection-bypass + x-vercel-set-bypass-cookie) on every
+          # Playwright request, defeating Vercel Deployment Protection.
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-csp
+          path: playwright-report/
+          retention-days: 7
