@@ -45,6 +45,14 @@ for (const path of PAGES) {
         /Content Security Policy directive/i.test(text) &&
         /script-src/i.test(text)
       ) {
+        // Vercel injects its collaboration widget (vercel.live/_next-live/...)
+        // on Preview deployments only. Our production CSP intentionally does
+        // not whitelist vercel.live — the script never loads in prod. Filter
+        // these preview-only third-party violations so the test stays focused
+        // on own-origin regressions like the #61 RSC bootstrap miss.
+        if (/https:\/\/vercel\.live\//.test(text)) {
+          return;
+        }
         violations.push(text);
       }
     });
