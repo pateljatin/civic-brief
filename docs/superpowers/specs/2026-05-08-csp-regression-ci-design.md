@@ -52,11 +52,11 @@ PR opened / pushed
 
 `deployment_status` events run in the base repository's context regardless of fork origin. Secrets are available. The practical trade-off: fork PRs only get the check after a maintainer approves the Vercel preview deployment (standard OSS gate). That is acceptable; maintainer approval already gates the deploy itself.
 
-GitHub Actions docs: "Workflows that run in a pull_request event from a fork don't have access to secrets." `deployment_status` is exempt from this restriction because it fires in the base repo context.
+GitHub Actions docs: "With the exception of `GITHUB_TOKEN`, secrets are not passed to the runner when a workflow is triggered from a forked repository." ([docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions)) `deployment_status` is exempt because it fires in the base repo context, not the fork's.
 
 ### Bypass auth
 
-Vercel deployment protection walls preview URLs by default. The bypass mechanism sends `x-vercel-protection-bypass: <VERCEL_AUTOMATION_BYPASS_SECRET>` as an HTTP header on every Playwright request. This is stateless; no cookie session is established. The header is injected via Playwright's `extraHTTPHeaders` in `playwright.config.ts` (or directly in `csp.spec.ts`) when `E2E_BASE_URL` is set and the bypass secret is present.
+Vercel deployment protection walls preview URLs by default. The bypass mechanism sends two headers on every Playwright request: `x-vercel-protection-bypass: <VERCEL_AUTOMATION_BYPASS_SECRET>` to authorize the request, and `x-vercel-set-bypass-cookie: true` to ask Vercel to set a session cookie that covers any browser-initiated navigations Playwright does not route through `extraHTTPHeaders`. The headers are injected directly in `tests/e2e/csp.spec.ts` via `test.use({ extraHTTPHeaders })` at module scope when `VERCEL_AUTOMATION_BYPASS_SECRET` is set in the environment.
 
 Vercel docs on the bypass header: "Set the `x-vercel-protection-bypass` header to the value of your Bypass for Automation secret." ([vercel.com/docs/deployments/deployment-protection](https://vercel.com/docs/deployments/deployment-protection))
 
