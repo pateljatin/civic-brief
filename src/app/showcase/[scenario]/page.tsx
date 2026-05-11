@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getScenarioBySlug } from '@/lib/showcase';
+import { getScenarioBySlug, scenarios } from '@/lib/showcase';
 import ScenarioHero from '@/components/ScenarioHero';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent } from '@/lib/types';
@@ -7,6 +7,14 @@ import type { CivicContent } from '@/lib/types';
 interface PageProps {
   params: Promise<{ scenario: string }>;
 }
+
+// Unknown slugs 404 before streaming starts, so the response code is actually 404
+// instead of a streamed soft-404 with status 200. See Next.js streaming status-code docs.
+export function generateStaticParams() {
+  return scenarios.map((s) => ({ scenario: s.slug }));
+}
+
+export const dynamicParams = false;
 
 export async function generateMetadata({ params }: PageProps) {
   const { scenario: slug } = await params;

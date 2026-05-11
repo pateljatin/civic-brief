@@ -2,6 +2,16 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent, FeedbackType } from '@/lib/types';
+import { isValidUUID } from '@/lib/security';
+
+// Brief IDs are an open set (UUIDs from Supabase, plus the `demo`/`test-id` mocks).
+// Reject anything else at the metadata stage so the response is a real HTTP 404 instead
+// of the streamed soft-404 the page handler would otherwise emit. Valid-format-but-not-in-DB
+// still resolves through notFound() in the page body (acceptable soft-404; SEO is protected
+// by Next.js' noindex meta tag on streamed not-found pages).
+function isAllowedBriefSlug(id: string): boolean {
+  return id === 'demo' || id === 'test-id' || isValidUUID(id);
+}
 
 // Mock data for when Supabase is not configured
 const MOCK_BRIEF = {
@@ -69,6 +79,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+
+  if (!isAllowedBriefSlug(id)) {
+    notFound();
+  }
 
   if (id === 'demo' || id === 'test-id') {
     return {

@@ -124,6 +124,11 @@ test.describe('Brief demo page', () => {
     await page.goto('/brief/demo');
     await checkA11y(page, 'Brief Demo');
   });
+
+  test('returns 404 for malformed brief id', async ({ page }) => {
+    const response = await page.goto('/brief/nonexistent');
+    expect(response?.status()).toBe(404);
+  });
 });
 
 test.describe('Language switching', () => {
