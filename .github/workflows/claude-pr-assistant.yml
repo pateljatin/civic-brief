@@ -1,0 +1,45 @@
+name: Claude PR Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    if: |
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '@.claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are reviewing a PR for civic-brief. The user triggered you via @.claude comment.
+
+            Their request: "${{ github.event.comment.body }}"
+
+            If no specific request, do the following:
+            1. Review the PR diff for architectural decisions, new patterns, gotchas, or
+               security implications worth documenting.
+            2. Check docs/claude/ reference files -- if any are now stale given this PR,
+               update them in a new commit on the PR branch.
+            3. Post a summary comment on the PR with: what you found, what you updated (if
+               anything), and any issues worth flagging.
+
+            Rules:
+            - CLAUDE.md is gitignored -- do not try to update it. Update docs/claude/ instead.
+            - Only update docs if the change is factually warranted by the PR diff.
+            - Keep updates concise -- append to existing sections, do not rewrite.
+            - Never add Co-Authored-By Claude lines to commits.

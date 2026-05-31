@@ -1,1 +1,18 @@
-{ "includeGitInstructions": false }
+{
+  "includeGitInstructions": false,
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -File C:/Users/jatin/code/civic-brief/.claude/hooks/stop-baseline-check.ps1",
+            "shell": "powershell",
+            "timeout": 120,
+            "statusMessage": "Checking test baseline..."
+          }
+        ]
+      }
+    ]
+  }
+}
