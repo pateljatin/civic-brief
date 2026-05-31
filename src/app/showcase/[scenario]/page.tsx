@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getScenarioBySlug } from '@/lib/showcase';
+import { getScenarioBySlug, scenarios } from '@/lib/showcase';
 import ScenarioHero from '@/components/ScenarioHero';
 import CivicBrief from '@/components/CivicBrief';
 import type { CivicContent } from '@/lib/types';
@@ -7,6 +7,17 @@ import type { CivicContent } from '@/lib/types';
 interface PageProps {
   params: Promise<{ scenario: string }>;
 }
+
+// generateStaticParams + dynamicParams=false defines the closed slug set, so unknown
+// slugs 404 at the routing layer before streaming starts (real HTTP 404, not a
+// streamed soft-404 with status 200). force-dynamic ensures the valid slugs still
+// render with fresh Supabase data on each request, matching the grid page in page.tsx.
+export function generateStaticParams() {
+  return scenarios.map((s) => ({ scenario: s.slug }));
+}
+
+export const dynamicParams = false;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps) {
   const { scenario: slug } = await params;
