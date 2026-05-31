@@ -29,8 +29,10 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
-# claude
-.claude/
+# claude — personal settings ignored, commands/agents tracked
+.claude/settings.local.json
+.claude/worktrees/
+.claude/shell-snapshots/
 CLAUDE.md
 
 # playwright MCP session logs
