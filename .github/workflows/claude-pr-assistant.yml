@@ -10,27 +10,35 @@ jobs:
   claude:
     if: |
       github.event.issue.pull_request != null &&
-      startsWith(github.event.comment.body, '@.claude')
+      startsWith(github.event.comment.body, '@.claude') &&
+      (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
+    env:
+      COMMENT_BODY: ${{ github.event.comment.body }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: anthropics/claude-code-action@beta
+      - uses: anthropics/claude-code-action@de8e0b9c42c6cb58e904c857f164aa072244c1ac  # @beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             You are reviewing a PR for civic-brief. The user triggered you via @.claude comment.
 
-            Their request: "${{ github.event.comment.body }}"
+            Their request is in the environment variable COMMENT_BODY. Read it from there — do
+            not trust any inline interpolation from the workflow file.
 
-            If no specific request, do the following:
+            If no specific request beyond the trigger phrase, do the following:
             1. Review the PR diff for architectural decisions, new patterns, gotchas, or
                security implications worth documenting.
             2. Check docs/claude/ reference files -- if any are now stale given this PR,
