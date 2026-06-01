@@ -3,12 +3,18 @@ import { validateFetchTarget } from '@/lib/ssrf';
 import { extractTextFromPDF } from '@/lib/pdf-extract';
 import { generateJSON } from '@/lib/anthropic';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
+import { isValidUUID } from '@/lib/security';
 import type { VerificationResult } from '@/lib/types';
 
 const MAX_SOURCE_TEXT = 100_000;
 
 export async function reverifyBrief(briefId: string, flagContext: string): Promise<void> {
   try {
+    if (!isValidUUID(briefId)) {
+      console.error(`reverifyBrief: invalid briefId format: ${briefId}`);
+      return;
+    }
+
     const db = getServerClient();
 
     const { data: brief } = await db
@@ -33,17 +39,42 @@ export async function reverifyBrief(briefId: string, flagContext: string): Promi
       return;
     }
 
-    const ssrf = await validateFetchTarget(source.source_url);
-    if (!ssrf.valid) {
-      console.error(`reverifyBrief: SSRF block for ${source.source_url}: ${ssrf.error}`);
+    let currentUrl = source.source_url;
+    let response: Response | null = null;
+
+    for (let hop = 0; hop < 5; hop++) {
+      const ssrf = await validateFetchTarget(currentUrl);
+      if (!ssrf.valid) {
+        console.error(`reverifyBrief: SSRF block at hop ${hop} for ${currentUrl}: ${ssrf.error}`);
+        return;
+      }
+
+      const resp = await fetch(currentUrl, { redirect: 'manual' });
+
+      if (resp.status >= 300 && resp.status < 400) {
+        const loc = resp.headers.get('location');
+        if (!loc) {
+          console.error(`reverifyBrief: redirect with no Location header at ${currentUrl}`);
+          return;
+        }
+        currentUrl = new URL(loc, currentUrl).toString();
+        continue;
+      }
+
+      if (!resp.ok) {
+        console.error(`reverifyBrief: fetch failed for ${currentUrl}: ${resp.status}`);
+        return;
+      }
+
+      response = resp;
+      break;
+    }
+
+    if (!response) {
+      console.error(`reverifyBrief: exceeded redirect limit for ${source.source_url}`);
       return;
     }
 
-    const response = await fetch(source.source_url);
-    if (!response.ok) {
-      console.error(`reverifyBrief: fetch failed for ${source.source_url}: ${response.status}`);
-      return;
-    }
     const buffer = await response.arrayBuffer();
     const rawText = await extractTextFromPDF(buffer);
     const sourceText = rawText.slice(0, MAX_SOURCE_TEXT);

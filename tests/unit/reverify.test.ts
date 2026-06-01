@@ -13,7 +13,13 @@ let mockSourceRow: { source_url: string; factuality_score: number | null } | nul
   factuality_score: 0.85,
 };
 
+let sourcesUpdateMock: ReturnType<typeof vi.fn>;
+
 function buildMockDb() {
+  sourcesUpdateMock = vi.fn().mockReturnValue({
+    eq: vi.fn().mockResolvedValue({ error: null }),
+  });
+
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === 'briefs') {
@@ -32,9 +38,7 @@ function buildMockDb() {
               maybeSingle: vi.fn().mockResolvedValue({ data: mockSourceRow, error: null }),
             }),
           }),
-          update: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ error: null }),
-          }),
+          update: sourcesUpdateMock,
         };
       }
       if (table === 'community_feedback') {
@@ -99,27 +103,25 @@ describe('reverifyBrief', () => {
   });
 
   it('degrades source score when new score is lower than current', async () => {
-    // mocked generateJSON returns 0.72, current is 0.85 — should degrade
+    // generateJSON returns 0.72, current is 0.85 — should degrade
     const { reverifyBrief } = await import('@/lib/reverify');
     await reverifyBrief(MOCK_BRIEF_ID, '[factual_error]: wrong number');
-    const { getServerClient } = await import('@/lib/supabase');
-    const db = vi.mocked(getServerClient)();
-    const updateCalls = vi.mocked(db.from).mock.calls.filter(([t]) => t === 'sources');
-    // Should have called sources.from at least twice: once for select, once for update
-    expect(updateCalls.length).toBeGreaterThanOrEqual(2);
+    expect(sourcesUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        factuality_score: 0.72,
+        confidence_level: 'high',
+        requires_review: false,
+      })
+    );
   });
 
   it('does not update score when new score is not lower than current', async () => {
+    // current score 0.50, generateJSON returns 0.72 — no degrade
     mockSourceRow = { source_url: MOCK_SOURCE_URL, factuality_score: 0.50 };
     mockDb = buildMockDb();
-    // generateJSON returns 0.72 which is > 0.50 — no degrade
     const { reverifyBrief } = await import('@/lib/reverify');
     await reverifyBrief(MOCK_BRIEF_ID, '[factual_error]: wrong number');
-    const { getServerClient } = await import('@/lib/supabase');
-    const db = vi.mocked(getServerClient)();
-    // sources.from should be called once (select only, no update)
-    const sourceCalls = vi.mocked(db.from).mock.calls.filter(([t]) => t === 'sources');
-    expect(sourceCalls.length).toBe(1);
+    expect(sourcesUpdateMock).not.toHaveBeenCalled();
   });
 
   it('degrades score when current factuality_score is null', async () => {
@@ -154,5 +156,10 @@ describe('reverifyBrief', () => {
     vi.mocked(generateJSON).mockRejectedValueOnce(new Error('Claude unavailable'));
     const { reverifyBrief } = await import('@/lib/reverify');
     await expect(reverifyBrief(MOCK_BRIEF_ID, '[factual_error]: x')).resolves.toBeUndefined();
+  });
+
+  it('resolves without throwing when briefId is not a valid UUID', async () => {
+    const { reverifyBrief } = await import('@/lib/reverify');
+    await expect(reverifyBrief('not-a-uuid', '[factual_error]: x')).resolves.toBeUndefined();
   });
 });
