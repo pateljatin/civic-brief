@@ -1,5 +1,28 @@
 {
   "includeGitInstructions": false,
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm test -- *)",
+      "Bash(npm run test:check)",
+      "Bash(npm run test:all)",
+      "Bash(npm run build)",
+      "Bash(npm start)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx playwright test)",
+      "Bash(npx playwright test --grep *)",
+      "Bash(npx playwright test --reporter=*)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm test)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm test -- *)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm run test:check)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm run test:all)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm run build)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npx tsc --noEmit)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npx playwright test)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npx playwright test --grep *)",
+      "Bash(cd C:/Users/jatin/code/civic-brief && npm start)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {

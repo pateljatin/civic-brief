@@ -12,5 +12,6 @@ export function sanitizeDocumentText(text: string): string {
     .replace(/^system\s*:/gmi, '[redacted]:')
     // Remove XML-like closing tags that could break our delimiters
     .replace(/<\/?source_document>/gi, '[redacted]')
-    .replace(/<\/?civic_summary>/gi, '[redacted]');
+    .replace(/<\/?civic_summary>/gi, '[redacted]')
+    .replace(/<\/?community_flags>/gi, '[redacted]');
 }

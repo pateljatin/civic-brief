@@ -3,8 +3,9 @@ import { getServerClient } from '@/lib/supabase';
 import { createAuthServerClient } from '@/lib/supabase-server';
 import { sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
 import { rateLimitByUserId } from '@/lib/rate-limit';
-import { FEEDBACK_TYPES } from '@/lib/types';
+import { USER_FEEDBACK_TYPES } from '@/lib/types';
 import type { FeedbackType } from '@/lib/types';
+import { reverifyBrief } from '@/lib/reverify';
 
 const REVERIFY_THRESHOLD = 2;
 const RETRANSLATE_THRESHOLD = 2;
@@ -47,9 +48,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Validate feedbackType
-    if (!feedbackType || !FEEDBACK_TYPES.includes(feedbackType)) {
+    if (!feedbackType || !USER_FEEDBACK_TYPES.includes(feedbackType)) {
       return NextResponse.json(
-        { error: `Invalid feedback type. Must be one of: ${FEEDBACK_TYPES.join(', ')}` },
+        { error: `Invalid feedback type. Must be one of: ${USER_FEEDBACK_TYPES.join(', ')}` },
         { status: 422 }
       );
     }
@@ -139,6 +140,14 @@ async function checkAndTriggerReverification(
     .in('feedback_type', REVERIFY_TYPES);
 
   if ((count || 0) >= REVERIFY_THRESHOLD) {
+    const { count: alreadyRun } = await db
+      .from('community_feedback')
+      .select('*', { count: 'exact', head: true })
+      .eq('brief_id', briefId)
+      .eq('feedback_type', 'reverification');
+
+    if ((alreadyRun || 0) > 0) return;
+
     const { data: flags } = await db
       .from('community_feedback')
       .select('feedback_type, details')
@@ -150,9 +159,9 @@ async function checkAndTriggerReverification(
       ?.map((f) => `[${f.feedback_type}]: ${f.details}`)
       .join('\n') || '';
 
-    console.log(
-      `Re-verification triggered for brief ${briefId} (${count} flags). Context: ${flagContext}`
-    );
+    reverifyBrief(briefId, flagContext).catch((err: unknown) => {
+      console.error('reverifyBrief failed:', err);
+    });
   }
 }
 

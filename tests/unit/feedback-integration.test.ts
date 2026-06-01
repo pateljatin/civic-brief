@@ -69,8 +69,9 @@ function createMockDb(overrides: {
   briefExists?: boolean;
   insertError?: { code: string; message: string } | null;
   feedbackCount?: number;
+  alreadyReverified?: boolean;
 } = {}) {
-  const { briefExists = true, insertError = null, feedbackCount = 0 } = overrides;
+  const { briefExists = true, insertError = null, feedbackCount = 0, alreadyReverified = false } = overrides;
 
   const mockDb = {
     from: vi.fn().mockImplementation((table: string) => {
@@ -96,27 +97,38 @@ function createMockDb(overrides: {
       }
 
       if (table === 'community_feedback') {
+        const flagData = feedbackCount >= 2
+          ? [{ feedback_type: 'factual_error', details: 'wrong budget figure' }]
+          : [];
+
         return {
           insert: vi.fn().mockResolvedValue({ error: insertError }),
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                // For count queries
-                count: feedbackCount,
-              }),
-              in: vi.fn().mockReturnValue({
-                // For threshold count
-                not: vi.fn().mockReturnValue({
-                  data: [],
-                  error: null,
-                }),
-                then: vi.fn(),
-              }),
-              not: vi.fn().mockReturnValue({
-                data: [],
-                error: null,
-              }),
-            }),
+          select: vi.fn().mockImplementation((selectStr: string) => {
+            // Count query: select('*', { count: 'exact', head: true })
+            // The second argument is the options object; selectStr will be '*'
+            if (selectStr === '*') {
+              const countChain = {
+                eq: vi.fn(),
+                in: vi.fn(),
+              };
+              // First .eq('brief_id', ...) returns chain with .in() (threshold) and .eq() (dedup)
+              const innerEqChain = {
+                in: vi.fn().mockResolvedValue({ count: feedbackCount, data: null, error: null }),
+                eq: vi.fn().mockResolvedValue({ count: alreadyReverified ? 1 : 0, data: null, error: null }),
+              };
+              countChain.eq.mockReturnValue(innerEqChain);
+              return countChain;
+            }
+            // Flags query: select('feedback_type, details') or select('details')
+            const flagsChain = {
+              eq: vi.fn(),
+              in: vi.fn(),
+              not: vi.fn(),
+            };
+            const notResult = Promise.resolve({ data: flagData, error: null });
+            const inChain = { not: vi.fn().mockReturnValue(notResult) };
+            flagsChain.eq.mockReturnValue({ in: vi.fn().mockReturnValue(inChain) });
+            return flagsChain;
           }),
         };
       }
@@ -142,6 +154,11 @@ function createMockDb(overrides: {
 // Mock modules
 let mockUser: { id: string } | null = { id: MOCK_USER_ID };
 let mockDb = createMockDb();
+
+const reverifyBriefSpy = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/reverify', () => ({
+  reverifyBrief: reverifyBriefSpy,
+}));
 
 vi.mock('@/lib/supabase-server', () => ({
   createAuthServerClient: vi.fn().mockImplementation(async () => ({
@@ -417,6 +434,56 @@ describe('POST /api/feedback (integration)', () => {
       const body = await res.json();
       expect(body.error).toMatch(/too many requests/i);
       expect(res.headers.get('Retry-After')).toBeTruthy();
+    });
+  });
+
+  // ── Auto-Reverification ──
+
+  describe('auto-reverification trigger', () => {
+    it('does not call reverifyBrief for non-reverify types like helpful', async () => {
+      reverifyBriefSpy.mockClear();
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'helpful',
+      }));
+      expect(res.status).toBe(200);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).not.toHaveBeenCalled();
+    });
+
+    it('calls reverifyBrief when factual_error flags reach threshold', async () => {
+      // Create a mock DB where the count query returns 2 (at threshold)
+      mockDb = createMockDb({ feedbackCount: 2 });
+      reverifyBriefSpy.mockClear();
+
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'factual_error',
+        details: 'wrong budget figure',
+      }));
+
+      expect(res.status).toBe(200);
+      // Wait for fire-and-forget to settle
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).toHaveBeenCalledWith(
+        MOCK_BRIEF_ID,
+        expect.any(String)
+      );
+    });
+
+    it('does not call reverifyBrief when a reverification has already run', async () => {
+      mockDb = createMockDb({ feedbackCount: 3, alreadyReverified: true });
+      reverifyBriefSpy.mockClear();
+
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'factual_error',
+        details: 'another flag after first reverification',
+      }));
+
+      expect(res.status).toBe(200);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).not.toHaveBeenCalled();
     });
   });
 });
