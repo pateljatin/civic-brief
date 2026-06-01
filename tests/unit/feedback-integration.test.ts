@@ -96,27 +96,36 @@ function createMockDb(overrides: {
       }
 
       if (table === 'community_feedback') {
+        const flagData = feedbackCount >= 2
+          ? [{ feedback_type: 'factual_error', details: 'wrong budget figure' }]
+          : [];
+
         return {
           insert: vi.fn().mockResolvedValue({ error: insertError }),
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                // For count queries
-                count: feedbackCount,
-              }),
-              in: vi.fn().mockReturnValue({
-                // For threshold count
-                not: vi.fn().mockReturnValue({
-                  data: [],
-                  error: null,
-                }),
-                then: vi.fn(),
-              }),
-              not: vi.fn().mockReturnValue({
-                data: [],
-                error: null,
-              }),
-            }),
+          select: vi.fn().mockImplementation((selectStr: string) => {
+            // Count query: select('*', { count: 'exact', head: true })
+            // The second argument is the options object; selectStr will be '*'
+            if (selectStr === '*') {
+              const countChain = {
+                eq: vi.fn(),
+                in: vi.fn(),
+              };
+              // .eq('brief_id', ...).in('feedback_type', ...) -> resolves with count
+              const inResult = Promise.resolve({ count: feedbackCount, data: null, error: null });
+              const eqChain = { in: vi.fn().mockReturnValue(inResult) };
+              countChain.eq.mockReturnValue(eqChain);
+              return countChain;
+            }
+            // Flags query: select('feedback_type, details') or select('details')
+            const flagsChain = {
+              eq: vi.fn(),
+              in: vi.fn(),
+              not: vi.fn(),
+            };
+            const notResult = Promise.resolve({ data: flagData, error: null });
+            const inChain = { not: vi.fn().mockReturnValue(notResult) };
+            flagsChain.eq.mockReturnValue({ in: vi.fn().mockReturnValue(inChain) });
+            return flagsChain;
           }),
         };
       }
@@ -437,6 +446,26 @@ describe('POST /api/feedback (integration)', () => {
       expect(res.status).toBe(200);
       await new Promise((r) => setTimeout(r, 50));
       expect(reverifyBriefSpy).not.toHaveBeenCalled();
+    });
+
+    it('calls reverifyBrief when factual_error flags reach threshold', async () => {
+      // Create a mock DB where the count query returns 2 (at threshold)
+      mockDb = createMockDb({ feedbackCount: 2 });
+      reverifyBriefSpy.mockClear();
+
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'factual_error',
+        details: 'wrong budget figure',
+      }));
+
+      expect(res.status).toBe(200);
+      // Wait for fire-and-forget to settle
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).toHaveBeenCalledWith(
+        MOCK_BRIEF_ID,
+        expect.any(String)
+      );
     });
   });
 });
