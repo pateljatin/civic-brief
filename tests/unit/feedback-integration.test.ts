@@ -143,6 +143,11 @@ function createMockDb(overrides: {
 let mockUser: { id: string } | null = { id: MOCK_USER_ID };
 let mockDb = createMockDb();
 
+const reverifyBriefSpy = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/reverify', () => ({
+  reverifyBrief: reverifyBriefSpy,
+}));
+
 vi.mock('@/lib/supabase-server', () => ({
   createAuthServerClient: vi.fn().mockImplementation(async () => ({
     auth: {
@@ -417,6 +422,21 @@ describe('POST /api/feedback (integration)', () => {
       const body = await res.json();
       expect(body.error).toMatch(/too many requests/i);
       expect(res.headers.get('Retry-After')).toBeTruthy();
+    });
+  });
+
+  // ── Auto-Reverification ──
+
+  describe('auto-reverification trigger', () => {
+    it('does not call reverifyBrief for non-reverify types like helpful', async () => {
+      reverifyBriefSpy.mockClear();
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'helpful',
+      }));
+      expect(res.status).toBe(200);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -5,6 +5,7 @@ import { sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
 import { rateLimitByUserId } from '@/lib/rate-limit';
 import { FEEDBACK_TYPES } from '@/lib/types';
 import type { FeedbackType } from '@/lib/types';
+import { reverifyBrief } from '@/lib/reverify';
 
 const REVERIFY_THRESHOLD = 2;
 const RETRANSLATE_THRESHOLD = 2;
@@ -150,9 +151,9 @@ async function checkAndTriggerReverification(
       ?.map((f) => `[${f.feedback_type}]: ${f.details}`)
       .join('\n') || '';
 
-    console.log(
-      `Re-verification triggered for brief ${briefId} (${count} flags). Context: ${flagContext}`
-    );
+    reverifyBrief(briefId, flagContext).catch((err: unknown) => {
+      console.error('reverifyBrief failed:', err);
+    });
   }
 }
 
