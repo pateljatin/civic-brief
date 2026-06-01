@@ -79,7 +79,7 @@ export async function reverifyBrief(briefId: string, flagContext: string): Promi
       CIVIC_VERIFY_USER(sourceText, summaryJson, flagContext)
     );
 
-    Promise.resolve(
+    const { error: logError } = await Promise.resolve(
       db.from('community_feedback').insert({
         brief_id: briefId,
         user_id: '00000000-0000-0000-0000-000000000000',
@@ -92,7 +92,8 @@ export async function reverifyBrief(briefId: string, flagContext: string): Promi
           flag_context_length: flagContext.length,
         },
       })
-    ).catch((err: unknown) => console.error('reverifyBrief: failed to log feedback row:', err));
+    );
+    if (logError) console.error('reverifyBrief: failed to log feedback row:', logError);
 
     const currentScore = source.factuality_score;
     const shouldDegrade = currentScore === null || verification.confidence_score < currentScore;

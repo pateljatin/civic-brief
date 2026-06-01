@@ -137,22 +137,27 @@ export interface BriefTopic {
   assigned_by: 'ai' | 'human';
 }
 
-export type FeedbackType =
+export type UserFeedbackType =
   | 'factual_error'
   | 'missing_info'
   | 'misleading'
   | 'translation_error'
   | 'outdated'
-  | 'helpful'
-  | 'reverification';
+  | 'helpful';
 
-export const FEEDBACK_TYPES: readonly FeedbackType[] = [
+export type FeedbackType = UserFeedbackType | 'reverification';
+
+export const USER_FEEDBACK_TYPES: readonly UserFeedbackType[] = [
   'factual_error',
   'missing_info',
   'misleading',
   'translation_error',
   'outdated',
   'helpful',
+] as const;
+
+export const FEEDBACK_TYPES: readonly FeedbackType[] = [
+  ...USER_FEEDBACK_TYPES,
   'reverification',
 ] as const;
 

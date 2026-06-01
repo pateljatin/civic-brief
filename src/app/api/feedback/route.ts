@@ -3,7 +3,7 @@ import { getServerClient } from '@/lib/supabase';
 import { createAuthServerClient } from '@/lib/supabase-server';
 import { sanitizeText, isValidUUID, safeErrorMessage } from '@/lib/security';
 import { rateLimitByUserId } from '@/lib/rate-limit';
-import { FEEDBACK_TYPES } from '@/lib/types';
+import { USER_FEEDBACK_TYPES } from '@/lib/types';
 import type { FeedbackType } from '@/lib/types';
 import { reverifyBrief } from '@/lib/reverify';
 
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Validate feedbackType
-    if (!feedbackType || !FEEDBACK_TYPES.includes(feedbackType)) {
+    if (!feedbackType || !USER_FEEDBACK_TYPES.includes(feedbackType)) {
       return NextResponse.json(
-        { error: `Invalid feedback type. Must be one of: ${FEEDBACK_TYPES.join(', ')}` },
+        { error: `Invalid feedback type. Must be one of: ${USER_FEEDBACK_TYPES.join(', ')}` },
         { status: 422 }
       );
     }
