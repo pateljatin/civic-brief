@@ -1,5 +1,27 @@
 {
   "includeGitInstructions": false,
+  "permissions": {
+    "allow": [
+      "Bash(npm test *)",
+      "Bash(npm test)",
+      "Bash(npm run test:check)",
+      "Bash(npm run test:all)",
+      "Bash(npm run build)",
+      "Bash(npm start *)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx playwright test *)",
+      "Bash(npx supabase db query *)",
+      "Bash(cd * && npm test *)",
+      "Bash(cd * && npm test)",
+      "Bash(cd * && npm run test:check)",
+      "Bash(cd * && npm run test:all)",
+      "Bash(cd * && npm run build)",
+      "Bash(cd * && npx tsc --noEmit)",
+      "Bash(cd * && npx playwright test *)",
+      "Bash(cd * && npx supabase db query *)",
+      "Bash(cd * && npm start *)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
