@@ -95,7 +95,7 @@ describe('civic prompts', () => {
         '{"title": "test"}',
         '[factual_error]: some concern'
       );
-      expect(prompt).toContain('untrusted');
+      expect(prompt).toContain('untrusted user-provided content');
     });
 
     it('community_flags block instructs Claude not to change scoring criteria', () => {
