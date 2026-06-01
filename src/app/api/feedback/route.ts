@@ -140,6 +140,14 @@ async function checkAndTriggerReverification(
     .in('feedback_type', REVERIFY_TYPES);
 
   if ((count || 0) >= REVERIFY_THRESHOLD) {
+    const { count: alreadyRun } = await db
+      .from('community_feedback')
+      .select('*', { count: 'exact', head: true })
+      .eq('brief_id', briefId)
+      .eq('feedback_type', 'reverification');
+
+    if ((alreadyRun || 0) > 0) return;
+
     const { data: flags } = await db
       .from('community_feedback')
       .select('feedback_type, details')

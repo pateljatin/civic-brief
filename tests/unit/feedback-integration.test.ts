@@ -69,8 +69,9 @@ function createMockDb(overrides: {
   briefExists?: boolean;
   insertError?: { code: string; message: string } | null;
   feedbackCount?: number;
+  alreadyReverified?: boolean;
 } = {}) {
-  const { briefExists = true, insertError = null, feedbackCount = 0 } = overrides;
+  const { briefExists = true, insertError = null, feedbackCount = 0, alreadyReverified = false } = overrides;
 
   const mockDb = {
     from: vi.fn().mockImplementation((table: string) => {
@@ -110,10 +111,12 @@ function createMockDb(overrides: {
                 eq: vi.fn(),
                 in: vi.fn(),
               };
-              // .eq('brief_id', ...).in('feedback_type', ...) -> resolves with count
-              const inResult = Promise.resolve({ count: feedbackCount, data: null, error: null });
-              const eqChain = { in: vi.fn().mockReturnValue(inResult) };
-              countChain.eq.mockReturnValue(eqChain);
+              // First .eq('brief_id', ...) returns chain with .in() (threshold) and .eq() (dedup)
+              const innerEqChain = {
+                in: vi.fn().mockResolvedValue({ count: feedbackCount, data: null, error: null }),
+                eq: vi.fn().mockResolvedValue({ count: alreadyReverified ? 1 : 0, data: null, error: null }),
+              };
+              countChain.eq.mockReturnValue(innerEqChain);
               return countChain;
             }
             // Flags query: select('feedback_type, details') or select('details')
@@ -466,6 +469,21 @@ describe('POST /api/feedback (integration)', () => {
         MOCK_BRIEF_ID,
         expect.any(String)
       );
+    });
+
+    it('does not call reverifyBrief when a reverification has already run', async () => {
+      mockDb = createMockDb({ feedbackCount: 3, alreadyReverified: true });
+      reverifyBriefSpy.mockClear();
+
+      const res = await POST(makeRequest({
+        briefId: MOCK_BRIEF_ID,
+        feedbackType: 'factual_error',
+        details: 'another flag after first reverification',
+      }));
+
+      expect(res.status).toBe(200);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(reverifyBriefSpy).not.toHaveBeenCalled();
     });
   });
 });

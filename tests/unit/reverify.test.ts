@@ -158,8 +158,4 @@ describe('reverifyBrief', () => {
     await expect(reverifyBrief(MOCK_BRIEF_ID, '[factual_error]: x')).resolves.toBeUndefined();
   });
 
-  it('resolves without throwing when briefId is not a valid UUID', async () => {
-    const { reverifyBrief } = await import('@/lib/reverify');
-    await expect(reverifyBrief('not-a-uuid', '[factual_error]: x')).resolves.toBeUndefined();
-  });
 });

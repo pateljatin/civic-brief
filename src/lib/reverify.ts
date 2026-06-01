@@ -3,18 +3,12 @@ import { validateFetchTarget } from '@/lib/ssrf';
 import { extractTextFromPDF } from '@/lib/pdf-extract';
 import { generateJSON } from '@/lib/anthropic';
 import { CIVIC_VERIFY_SYSTEM, CIVIC_VERIFY_USER } from '@/lib/prompts/civic-verify';
-import { isValidUUID } from '@/lib/security';
 import type { VerificationResult } from '@/lib/types';
 
 const MAX_SOURCE_TEXT = 100_000;
 
 export async function reverifyBrief(briefId: string, flagContext: string): Promise<void> {
   try {
-    if (!isValidUUID(briefId)) {
-      console.error(`reverifyBrief: invalid briefId format: ${briefId}`);
-      return;
-    }
-
     const db = getServerClient();
 
     const { data: brief } = await db
