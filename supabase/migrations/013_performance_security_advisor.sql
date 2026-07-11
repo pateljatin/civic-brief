@@ -11,7 +11,7 @@ CREATE POLICY "Public read brief_jurisdictions"
   ON public.brief_jurisdictions FOR SELECT USING (true);
 
 -- WARN: cleanup_rate_limits has mutable search_path (SQL injection risk)
-ALTER FUNCTION public.cleanup_rate_limits() SET search_path = public;
+ALTER FUNCTION public.cleanup_rate_limits() SET search_path = 'public';
 
 -- WARN: handle_new_user() is a trigger function but callable by anon/authenticated via REST
 -- It should only fire via trigger, never directly
@@ -30,7 +30,7 @@ CREATE POLICY "Read sources"
   ON public.sources FOR SELECT
   USING (
     status = 'processed'
-    OR submitted_by = (select auth.uid())
+    OR ((select auth.role()) = 'authenticated' AND submitted_by = (select auth.uid()))
   );
 
 -- INFO: Add missing indexes on foreign key columns

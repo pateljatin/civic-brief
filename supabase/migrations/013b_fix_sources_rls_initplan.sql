@@ -1,10 +1,5 @@
--- Migration 013b: Fix sources RLS policy to avoid per-row auth.uid() evaluation
--- Wrapping auth.uid() in (select ...) creates an InitPlan evaluated once per query
-
-DROP POLICY IF EXISTS "Read sources" ON public.sources;
-CREATE POLICY "Read sources"
-  ON public.sources FOR SELECT
-  USING (
-    status = 'processed'
-    OR submitted_by = (select auth.uid())
-  );
+-- Migration 013b: historical no-op
+-- This migration was authored to fix the sources RLS initplan issue but was made
+-- redundant before commit when 013 was corrected to already use (select auth.uid()).
+-- Retained here because it has been applied to the production database and tracked
+-- in supabase_migrations. The effective policy is the one in 013c.
